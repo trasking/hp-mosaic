@@ -6,9 +6,9 @@
 //  Copyright © 2015 Pilots & Incubation. All rights reserved.
 //
 
-#import "ViewController.h"
+#import "LaunchViewController.h"
 
-@interface ViewController ()
+@interface LaunchViewController ()
 
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *launchImageViewNarrowWidthConstraint;
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *launchImageViewNarrowAspectConstraint;
@@ -21,7 +21,7 @@
 
 @end
 
-@implementation ViewController
+@implementation LaunchViewController
 
 CGFloat kLaunchAnimationDelay = 0.5; // seconds
 CGFloat kLaunchAnimationDuration = 1.0; // seconds
