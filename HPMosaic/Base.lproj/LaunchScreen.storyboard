@@ -19,18 +19,18 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="launch" translatesAutoresizingMaskIntoConstraints="NO" id="Iwr-xf-0vh" userLabel="Launch Image View">
-                                <rect key="frame" x="225" y="250" width="150" height="100"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Launch Image" translatesAutoresizingMaskIntoConstraints="NO" id="Iwr-xf-0vh" userLabel="Launch Image View">
+                                <rect key="frame" x="225" y="241" width="150" height="119"/>
                                 <animations/>
                                 <constraints>
-                                    <constraint firstAttribute="width" secondItem="Iwr-xf-0vh" secondAttribute="height" multiplier="6:4" id="ZUe-l4-saI"/>
+                                    <constraint firstAttribute="width" secondItem="Iwr-xf-0vh" secondAttribute="height" multiplier="800:635" id="ZUe-l4-saI"/>
                                 </constraints>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="HP Mosaic" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sgM-pj-QNO" userLabel="Title Label">
-                                <rect key="frame" x="243" y="201" width="115" height="29"/>
+                                <rect key="frame" x="243" y="192" width="115" height="29"/>
                                 <animations/>
                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
-                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                         </subviews>
@@ -51,6 +51,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="launch" width="3600" height="800"/>
+        <image name="Launch Image" width="2400" height="635"/>
     </resources>
 </document>

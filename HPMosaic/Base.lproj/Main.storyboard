@@ -19,24 +19,18 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="launch" translatesAutoresizingMaskIntoConstraints="NO" id="dP7-rh-tP3" userLabel="Launch Image View">
-                                <rect key="frame" x="225" y="250" width="150" height="100"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Launch Image" translatesAutoresizingMaskIntoConstraints="NO" id="dP7-rh-tP3" userLabel="Launch Image View">
+                                <rect key="frame" x="225" y="241" width="150" height="119"/>
                                 <animations/>
                                 <constraints>
-                                    <constraint firstAttribute="width" secondItem="dP7-rh-tP3" secondAttribute="height" multiplier="6:4" id="0v7-E9-MQO"/>
-                                    <constraint firstAttribute="width" secondItem="dP7-rh-tP3" secondAttribute="height" multiplier="18:4" id="6wQ-OZ-aSD"/>
+                                    <constraint firstAttribute="width" secondItem="dP7-rh-tP3" secondAttribute="height" multiplier="800:635" id="0v7-E9-MQO" userLabel="Launch Image View Aspect Constraint"/>
                                 </constraints>
-                                <variation key="default">
-                                    <mask key="constraints">
-                                        <exclude reference="6wQ-OZ-aSD"/>
-                                    </mask>
-                                </variation>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="HP Mosaic" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="V8M-uE-GiA" userLabel="Title Label">
-                                <rect key="frame" x="243" y="201" width="115" height="29"/>
+                                <rect key="frame" x="243" y="192" width="115" height="29"/>
                                 <animations/>
                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
-                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                         </subviews>
@@ -46,21 +40,14 @@
                             <constraint firstItem="V8M-uE-GiA" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="8iK-CF-jTr"/>
                             <constraint firstItem="dP7-rh-tP3" firstAttribute="top" secondItem="V8M-uE-GiA" secondAttribute="bottom" constant="20" id="Nug-Ci-4vi"/>
                             <constraint firstItem="dP7-rh-tP3" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="WJn-YJ-oTI"/>
-                            <constraint firstItem="dP7-rh-tP3" firstAttribute="width" secondItem="8bC-Xf-vdC" secondAttribute="width" multiplier="0.25" id="XFL-vC-xpS"/>
+                            <constraint firstItem="dP7-rh-tP3" firstAttribute="width" secondItem="8bC-Xf-vdC" secondAttribute="width" multiplier="0.25" id="XFL-vC-xpS" userLabel="Launch Image View Width Constraint"/>
                             <constraint firstItem="dP7-rh-tP3" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="afQ-iH-0PZ"/>
-                            <constraint firstItem="dP7-rh-tP3" firstAttribute="width" secondItem="8bC-Xf-vdC" secondAttribute="width" multiplier="0.75" id="bBP-dm-bRe"/>
                         </constraints>
-                        <variation key="default">
-                            <mask key="constraints">
-                                <exclude reference="bBP-dm-bRe"/>
-                            </mask>
-                        </variation>
                     </view>
                     <connections>
+                        <outlet property="launchImageView" destination="dP7-rh-tP3" id="X1a-oB-k1A"/>
                         <outlet property="launchImageViewNarrowAspectConstraint" destination="0v7-E9-MQO" id="MZC-bj-ras"/>
                         <outlet property="launchImageViewNarrowWidthConstraint" destination="XFL-vC-xpS" id="VUs-Zu-FcH"/>
-                        <outlet property="launchImageViewWideAspectConstraint" destination="6wQ-OZ-aSD" id="T7J-Jf-eEk"/>
-                        <outlet property="launchImageViewWideWidthConstraint" destination="bBP-dm-bRe" id="ZH0-6T-HpM"/>
                         <outlet property="titleLabel" destination="V8M-uE-GiA" id="xBV-n4-LDm"/>
                     </connections>
                 </viewController>
@@ -69,6 +56,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="launch" width="3600" height="800"/>
+        <image name="Launch Image" width="2400" height="635"/>
     </resources>
 </document>
