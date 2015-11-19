@@ -13,9 +13,12 @@
 		655AFD111BFD92A6006E0C6E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 655AFD0F1BFD92A6006E0C6E /* Main.storyboard */; };
 		655AFD131BFD92A6006E0C6E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 655AFD121BFD92A6006E0C6E /* Assets.xcassets */; };
 		655AFD161BFD92A6006E0C6E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 655AFD141BFD92A6006E0C6E /* LaunchScreen.storyboard */; };
+		939CF945DD3485379C27D274 /* libPods-HPMosaic.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 41E2172D3153F2067401BD79 /* libPods-HPMosaic.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		22CBA3E5A44ADB528784D8F7 /* Pods-HPMosaic.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HPMosaic.release.xcconfig"; path = "Pods/Target Support Files/Pods-HPMosaic/Pods-HPMosaic.release.xcconfig"; sourceTree = "<group>"; };
+		41E2172D3153F2067401BD79 /* libPods-HPMosaic.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-HPMosaic.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		655AFD031BFD92A6006E0C6E /* HPMosaic.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HPMosaic.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		655AFD071BFD92A6006E0C6E /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		655AFD091BFD92A6006E0C6E /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -26,6 +29,7 @@
 		655AFD121BFD92A6006E0C6E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		655AFD151BFD92A6006E0C6E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		655AFD171BFD92A6006E0C6E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		EDF2751A6D3C3E3B7EE0E22A /* Pods-HPMosaic.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HPMosaic.debug.xcconfig"; path = "Pods/Target Support Files/Pods-HPMosaic/Pods-HPMosaic.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -33,17 +37,37 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				939CF945DD3485379C27D274 /* libPods-HPMosaic.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		37E271865526C20C2F2AFDAE /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				41E2172D3153F2067401BD79 /* libPods-HPMosaic.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		558387B95BA7E613AF559046 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				EDF2751A6D3C3E3B7EE0E22A /* Pods-HPMosaic.debug.xcconfig */,
+				22CBA3E5A44ADB528784D8F7 /* Pods-HPMosaic.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 		655AFCFA1BFD92A6006E0C6E = {
 			isa = PBXGroup;
 			children = (
 				655AFD051BFD92A6006E0C6E /* HPMosaic */,
 				655AFD041BFD92A6006E0C6E /* Products */,
+				558387B95BA7E613AF559046 /* Pods */,
+				37E271865526C20C2F2AFDAE /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -86,9 +110,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 655AFD1A1BFD92A6006E0C6E /* Build configuration list for PBXNativeTarget "HPMosaic" */;
 			buildPhases = (
+				2144F7EE7C3984C930DA0C1D /* Check Pods Manifest.lock */,
 				655AFCFF1BFD92A6006E0C6E /* Sources */,
 				655AFD001BFD92A6006E0C6E /* Frameworks */,
 				655AFD011BFD92A6006E0C6E /* Resources */,
+				3E74A75A43CA0AC2E976FD2F /* Embed Pods Frameworks */,
+				936967A0608FFF82F8F07146 /* Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -143,6 +170,54 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		2144F7EE7C3984C930DA0C1D /* Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		3E74A75A43CA0AC2E976FD2F /* Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-HPMosaic/Pods-HPMosaic-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		936967A0608FFF82F8F07146 /* Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-HPMosaic/Pods-HPMosaic-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		655AFCFF1BFD92A6006E0C6E /* Sources */ = {
@@ -261,6 +336,7 @@
 		};
 		655AFD1B1BFD92A6006E0C6E /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EDF2751A6D3C3E3B7EE0E22A /* Pods-HPMosaic.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -273,6 +349,7 @@
 		};
 		655AFD1C1BFD92A6006E0C6E /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 22CBA3E5A44ADB528784D8F7 /* Pods-HPMosaic.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -302,6 +379,7 @@
 				655AFD1C1BFD92A6006E0C6E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
