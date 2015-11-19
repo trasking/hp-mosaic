@@ -44,6 +44,7 @@
                             <constraint firstItem="dP7-rh-tP3" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="afQ-iH-0PZ"/>
                         </constraints>
                     </view>
+                    <navigationItem key="navigationItem" id="leP-9u-JUC"/>
                     <connections>
                         <outlet property="launchImageView" destination="dP7-rh-tP3" id="X1a-oB-k1A"/>
                         <outlet property="launchImageViewNarrowAspectConstraint" destination="0v7-E9-MQO" id="MZC-bj-ras"/>
@@ -53,6 +54,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="1590" y="-8"/>
         </scene>
     </scenes>
     <resources>

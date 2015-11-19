@@ -2,7 +2,7 @@
 //  AppDelegate.h
 //  HPMosaic
 //
-//  Created by James Trask on 11/18/15.
+//  Created by HP Inc. on 11/18/15.
 //  Copyright © 2015 Pilots & Incubation. All rights reserved.
 //
 

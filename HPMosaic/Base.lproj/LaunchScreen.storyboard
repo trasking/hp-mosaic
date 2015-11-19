@@ -44,10 +44,11 @@
                             <constraint firstItem="Iwr-xf-0vh" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="eQf-k7-Voq"/>
                         </constraints>
                     </view>
+                    <navigationItem key="navigationItem" id="gQm-8C-xVT"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="53" y="375"/>
+            <point key="canvasLocation" x="979" y="533"/>
         </scene>
     </scenes>
     <resources>

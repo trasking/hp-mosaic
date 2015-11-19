@@ -2,7 +2,7 @@
 //  ViewController.m
 //  HPMosaic
 //
-//  Created by James Trask on 11/18/15.
+//  Created by HP Inc. on 11/18/15.
 //  Copyright © 2015 Pilots & Incubation. All rights reserved.
 //
 
@@ -14,6 +14,10 @@
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *launchImageViewNarrowAspectConstraint;
 @property (weak, nonatomic) IBOutlet UILabel *titleLabel;
 @property (weak, nonatomic) IBOutlet UIImageView *launchImageView;
+
+@property (strong, nonatomic)  NSLayoutConstraint *launchImageViewWidthConstraint;
+@property (strong, nonatomic)  NSLayoutConstraint *launchImageViewHeightConstraint;
+@property (strong, nonatomic)  NSLayoutConstraint *launchImageViewAspectConstraint;
 
 @end
 
@@ -38,13 +42,22 @@ CGFloat kLaunchConstraintAspectRatioMultiplier = 2400.0 / 635.0;
         [UIView animateWithDuration:kLaunchAnimationDuration animations:^{
             self.titleLabel.alpha = 0.0;
             [self.view layoutIfNeeded];
+        } completion:^(BOOL finished) {
+            [self.view layoutIfNeeded];
+            [self adjustConstraintsForFullWidth];
+            [UIView animateWithDuration:kLaunchAnimationDuration animations:^{
+                self.launchImageView.alpha = 0.0;
+                [self.view layoutIfNeeded];
+            } completion:^(BOOL finished) {
+                // animations complete
+            }];
         }];
     });
 }
 
 - (void)adjustConstraintsAfterLaunch
 {
-    NSLayoutConstraint *wideWidthConstraint = [NSLayoutConstraint constraintWithItem:self.launchImageView
+    self.launchImageViewWidthConstraint = [NSLayoutConstraint constraintWithItem:self.launchImageView
                                                                            attribute:NSLayoutAttributeWidth
                                                                            relatedBy:NSLayoutRelationEqual
                                                                               toItem:self.launchImageView.superview
@@ -53,7 +66,7 @@ CGFloat kLaunchConstraintAspectRatioMultiplier = 2400.0 / 635.0;
                                                                             constant:0 ];
     
     
-    NSLayoutConstraint *wideAspectRatioConstraint = [NSLayoutConstraint constraintWithItem:self.launchImageView
+    self.launchImageViewAspectConstraint = [NSLayoutConstraint constraintWithItem:self.launchImageView
                                                                            attribute:NSLayoutAttributeWidth
                                                                            relatedBy:NSLayoutRelationEqual
                                                                               toItem:self.launchImageView
@@ -64,8 +77,31 @@ CGFloat kLaunchConstraintAspectRatioMultiplier = 2400.0 / 635.0;
     
     self.launchImageViewNarrowWidthConstraint.active = NO;
     self.launchImageViewNarrowAspectConstraint.active = NO;
-    wideWidthConstraint.active = YES;
-    wideAspectRatioConstraint.active = YES;
+    self.launchImageViewWidthConstraint.active = YES;
+    self.launchImageViewAspectConstraint.active = YES;
+}
+
+- (void)adjustConstraintsForFullWidth
+{
+    self.launchImageViewWidthConstraint.active = NO;
+    self.launchImageViewAspectConstraint.active = NO;
+
+    self.launchImageViewWidthConstraint = [NSLayoutConstraint constraintWithItem:self.launchImageView
+                                                                       attribute:NSLayoutAttributeWidth
+                                                                       relatedBy:NSLayoutRelationEqual
+                                                                          toItem:self.launchImageView.superview
+                                                                       attribute:NSLayoutAttributeWidth
+                                                                      multiplier:1.0
+                                                                        constant:0 ];
+    self.launchImageViewHeightConstraint = [NSLayoutConstraint constraintWithItem:self.launchImageView
+                                                                        attribute:NSLayoutAttributeHeight
+                                                                        relatedBy:NSLayoutRelationEqual
+                                                                           toItem:self.launchImageView.superview
+                                                                        attribute:NSLayoutAttributeHeight
+                                                                       multiplier:1.0
+                                                                         constant:0 ];
+    self.launchImageViewWidthConstraint.active = YES;
+    self.launchImageViewHeightConstraint.active = YES;
 }
 
 - (void)didReceiveMemoryWarning {
