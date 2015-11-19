@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6211" systemVersion="14A298i" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9060" systemVersion="15B42" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6204"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9051"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
+        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
     </dependencies>
     <scenes>
         <!--View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="ViewController" customModuleProvider="" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="ViewController" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
@@ -15,11 +18,57 @@
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="launch" translatesAutoresizingMaskIntoConstraints="NO" id="dP7-rh-tP3" userLabel="Launch Image View">
+                                <rect key="frame" x="225" y="250" width="150" height="100"/>
+                                <animations/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="dP7-rh-tP3" secondAttribute="height" multiplier="6:4" id="0v7-E9-MQO"/>
+                                    <constraint firstAttribute="width" secondItem="dP7-rh-tP3" secondAttribute="height" multiplier="18:4" id="6wQ-OZ-aSD"/>
+                                </constraints>
+                                <variation key="default">
+                                    <mask key="constraints">
+                                        <exclude reference="6wQ-OZ-aSD"/>
+                                    </mask>
+                                </variation>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="HP Mosaic" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="V8M-uE-GiA" userLabel="Title Label">
+                                <rect key="frame" x="243" y="201" width="115" height="29"/>
+                                <animations/>
+                                <fontDescription key="fontDescription" type="system" pointSize="24"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <animations/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="V8M-uE-GiA" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="8iK-CF-jTr"/>
+                            <constraint firstItem="dP7-rh-tP3" firstAttribute="top" secondItem="V8M-uE-GiA" secondAttribute="bottom" constant="20" id="Nug-Ci-4vi"/>
+                            <constraint firstItem="dP7-rh-tP3" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="WJn-YJ-oTI"/>
+                            <constraint firstItem="dP7-rh-tP3" firstAttribute="width" secondItem="8bC-Xf-vdC" secondAttribute="width" multiplier="0.25" id="XFL-vC-xpS"/>
+                            <constraint firstItem="dP7-rh-tP3" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="afQ-iH-0PZ"/>
+                            <constraint firstItem="dP7-rh-tP3" firstAttribute="width" secondItem="8bC-Xf-vdC" secondAttribute="width" multiplier="0.75" id="bBP-dm-bRe"/>
+                        </constraints>
+                        <variation key="default">
+                            <mask key="constraints">
+                                <exclude reference="bBP-dm-bRe"/>
+                            </mask>
+                        </variation>
                     </view>
+                    <connections>
+                        <outlet property="launchImageViewNarrowAspectConstraint" destination="0v7-E9-MQO" id="MZC-bj-ras"/>
+                        <outlet property="launchImageViewNarrowWidthConstraint" destination="XFL-vC-xpS" id="VUs-Zu-FcH"/>
+                        <outlet property="launchImageViewWideAspectConstraint" destination="6wQ-OZ-aSD" id="T7J-Jf-eEk"/>
+                        <outlet property="launchImageViewWideWidthConstraint" destination="bBP-dm-bRe" id="ZH0-6T-HpM"/>
+                        <outlet property="titleLabel" destination="V8M-uE-GiA" id="xBV-n4-LDm"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
         </scene>
     </scenes>
+    <resources>
+        <image name="launch" width="3600" height="800"/>
+    </resources>
 </document>
