@@ -9,10 +9,11 @@
 /* Begin PBXBuildFile section */
 		655AFD081BFD92A6006E0C6E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 655AFD071BFD92A6006E0C6E /* main.m */; };
 		655AFD0B1BFD92A6006E0C6E /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 655AFD0A1BFD92A6006E0C6E /* AppDelegate.m */; };
-		655AFD0E1BFD92A6006E0C6E /* LaunchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 655AFD0D1BFD92A6006E0C6E /* LaunchViewController.m */; };
+		655AFD0E1BFD92A6006E0C6E /* HMLaunchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 655AFD0D1BFD92A6006E0C6E /* HMLaunchViewController.m */; };
 		655AFD111BFD92A6006E0C6E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 655AFD0F1BFD92A6006E0C6E /* Main.storyboard */; };
 		655AFD131BFD92A6006E0C6E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 655AFD121BFD92A6006E0C6E /* Assets.xcassets */; };
 		655AFD161BFD92A6006E0C6E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 655AFD141BFD92A6006E0C6E /* LaunchScreen.storyboard */; };
+		65D649B91BFE99D60093B085 /* HMCanvasViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 65D649B81BFE99D60093B085 /* HMCanvasViewController.m */; };
 		939CF945DD3485379C27D274 /* libPods-HPMosaic.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 41E2172D3153F2067401BD79 /* libPods-HPMosaic.a */; };
 /* End PBXBuildFile section */
 
@@ -23,12 +24,14 @@
 		655AFD071BFD92A6006E0C6E /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		655AFD091BFD92A6006E0C6E /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		655AFD0A1BFD92A6006E0C6E /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		655AFD0C1BFD92A6006E0C6E /* LaunchViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LaunchViewController.h; sourceTree = "<group>"; };
-		655AFD0D1BFD92A6006E0C6E /* LaunchViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LaunchViewController.m; sourceTree = "<group>"; };
+		655AFD0C1BFD92A6006E0C6E /* HMLaunchViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HMLaunchViewController.h; sourceTree = "<group>"; };
+		655AFD0D1BFD92A6006E0C6E /* HMLaunchViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HMLaunchViewController.m; sourceTree = "<group>"; };
 		655AFD101BFD92A6006E0C6E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		655AFD121BFD92A6006E0C6E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		655AFD151BFD92A6006E0C6E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		655AFD171BFD92A6006E0C6E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		65D649B71BFE99D60093B085 /* HMCanvasViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HMCanvasViewController.h; sourceTree = "<group>"; };
+		65D649B81BFE99D60093B085 /* HMCanvasViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HMCanvasViewController.m; sourceTree = "<group>"; };
 		EDF2751A6D3C3E3B7EE0E22A /* Pods-HPMosaic.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HPMosaic.debug.xcconfig"; path = "Pods/Target Support Files/Pods-HPMosaic/Pods-HPMosaic.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -84,13 +87,15 @@
 			children = (
 				655AFD091BFD92A6006E0C6E /* AppDelegate.h */,
 				655AFD0A1BFD92A6006E0C6E /* AppDelegate.m */,
-				655AFD0C1BFD92A6006E0C6E /* LaunchViewController.h */,
-				655AFD0D1BFD92A6006E0C6E /* LaunchViewController.m */,
+				655AFD0C1BFD92A6006E0C6E /* HMLaunchViewController.h */,
+				655AFD0D1BFD92A6006E0C6E /* HMLaunchViewController.m */,
 				655AFD0F1BFD92A6006E0C6E /* Main.storyboard */,
 				655AFD121BFD92A6006E0C6E /* Assets.xcassets */,
 				655AFD141BFD92A6006E0C6E /* LaunchScreen.storyboard */,
 				655AFD171BFD92A6006E0C6E /* Info.plist */,
 				655AFD061BFD92A6006E0C6E /* Supporting Files */,
+				65D649B71BFE99D60093B085 /* HMCanvasViewController.h */,
+				65D649B81BFE99D60093B085 /* HMCanvasViewController.m */,
 			);
 			path = HPMosaic;
 			sourceTree = "<group>";
@@ -225,9 +230,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				655AFD0E1BFD92A6006E0C6E /* LaunchViewController.m in Sources */,
+				655AFD0E1BFD92A6006E0C6E /* HMLaunchViewController.m in Sources */,
 				655AFD0B1BFD92A6006E0C6E /* AppDelegate.m in Sources */,
 				655AFD081BFD92A6006E0C6E /* main.m in Sources */,
+				65D649B91BFE99D60093B085 /* HMCanvasViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -6,9 +6,9 @@
 //  Copyright © 2015 Pilots & Incubation. All rights reserved.
 //
 
-#import "LaunchViewController.h"
+#import "HMLaunchViewController.h"
 
-@interface LaunchViewController ()
+@interface HMLaunchViewController ()
 
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *launchImageViewNarrowWidthConstraint;
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *launchImageViewNarrowAspectConstraint;
@@ -21,7 +21,7 @@
 
 @end
 
-@implementation LaunchViewController
+@implementation HMLaunchViewController
 
 CGFloat kLaunchAnimationDelay = 0.5; // seconds
 CGFloat kLaunchAnimationDuration = 1.0; // seconds
@@ -49,7 +49,7 @@ CGFloat kLaunchConstraintAspectRatioMultiplier = 2400.0 / 635.0;
                 self.launchImageView.alpha = 0.0;
                 [self.view layoutIfNeeded];
             } completion:^(BOOL finished) {
-                // animations complete
+                [self performSegueWithIdentifier:@"Show Canvas" sender:self];
             }];
         }];
     });
