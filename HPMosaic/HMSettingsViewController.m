@@ -7,11 +7,13 @@
 //
 
 #import "HMSettingsViewController.h"
+#import "HMGridButton.h"
 
 @interface HMSettingsViewController ()
 
 @property (weak, nonatomic) IBOutlet UIView *gridView;
-@property (strong, nonatomic) NSMutableArray<UIButton *> *gridButtons;
+@property (strong, nonatomic) NSMutableArray<HMGridButton *> *gridButtons;
+@property (assign, nonatomic) CGSize selectedSize;
 
 @end
 
@@ -19,6 +21,8 @@
 
 NSUInteger kHMTotalRows = 5;
 NSUInteger kHMTotalColumns = 5;
+
+#pragma mark - Initialization
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -30,22 +34,31 @@ NSUInteger kHMTotalColumns = 5;
     }
 }
 
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
+{
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+        // Place code here to perform animations during the rotation.
+        // You can pass nil or leave this block empty if not necessary.
+        [self refreshButtons];
+    } completion:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+        // Code here will execute after the rotation has finished.
+        // Equivalent to placing it in the deprecated method -[didRotateFromInterfaceOrientation:]
+        [self refreshButtons];
+    }];
+}
+
+#pragma mark - Buttons
+
 - (void)addButtonRow:(NSUInteger)row column:(NSUInteger)column
 {
-    UIButton *button = [[UIButton alloc] init];
+    HMGridButton *button = [[HMGridButton alloc] init];
     NSUInteger index = kHMTotalColumns * row + column;
     self.gridButtons[index] = button;
     [self.gridView addSubview:button];
     
     button.translatesAutoresizingMaskIntoConstraints = NO;
     button.tag = index;
-//    CGFloat alpha = (float)index / ((float)kHMTotalColumns * (float)kHMTotalRows);
-//    button.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:alpha];
-//    button.contentMode = UIViewContentModeScaleToFill;
-
-//    button.contentEdgeInsets = UIEdgeInsetsZero;
-//    button.imageEdgeInsets = UIEdgeInsetsZero;
-    [button setBackgroundImage:[UIImage imageNamed:@"Outline"] forState:UIControlStateNormal];
 
     CGFloat widthPercent = 1.0 / (float)kHMTotalColumns;
     CGFloat widthMultiplier = ((float)column * widthPercent + 0.5 * widthPercent) / 0.5;
@@ -91,6 +104,7 @@ NSUInteger kHMTotalColumns = 5;
     heightConstraint.active = YES;
     
     [button addTarget:self action:@selector(handleGridButtonTapped:) forControlEvents:UIControlEventTouchDragEnter + UIControlEventTouchDown];
+    button.included = NO;
 }
 
 - (void)handleGridButtonTapped:(id)sender
@@ -98,16 +112,18 @@ NSUInteger kHMTotalColumns = 5;
     UIButton *button = sender;
     NSUInteger selectedRow = button.tag / kHMTotalColumns;
     NSUInteger selectedColumn = button.tag - (selectedRow * kHMTotalColumns);
+    self.selectedSize = CGSizeMake(selectedColumn + 1, selectedRow + 1);
+    [self refreshButtons];
+}
+
+- (void)refreshButtons
+{
     for (int row = 0; row < kHMTotalRows; row++) {
         for (int column = 0; column < kHMTotalColumns; column++) {
-            UIColor *color = [UIColor whiteColor];
-            if (row <= selectedRow && column <= selectedColumn) {
-                color = [UIColor darkGrayColor];
-            }
-            self.gridButtons[kHMTotalColumns * row + column].backgroundColor = color;
+            BOOL included = row <= self.selectedSize.height - 1 && column <= self.selectedSize.width - 1;
+            self.gridButtons[kHMTotalColumns * row + column].included = included;
         }
     }
-
 }
 
 @end

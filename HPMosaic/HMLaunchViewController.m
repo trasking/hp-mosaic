@@ -24,7 +24,7 @@
 @implementation HMLaunchViewController
 
 CGFloat kLaunchAnimationDelay = 0.5; // seconds
-CGFloat kLaunchAnimationDuration = 1.0; // seconds
+CGFloat kLaunchAnimationDuration = 0.61803399; // seconds
 CGFloat kLaunchConstraintWidthMultiplier = 0.75;
 CGFloat kLaunchConstraintAspectRatioMultiplier = 2400.0 / 635.0;
 

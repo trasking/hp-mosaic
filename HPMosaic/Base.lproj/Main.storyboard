@@ -51,7 +51,7 @@
                         <outlet property="launchImageViewNarrowAspectConstraint" destination="0v7-E9-MQO" id="MZC-bj-ras"/>
                         <outlet property="launchImageViewNarrowWidthConstraint" destination="XFL-vC-xpS" id="VUs-Zu-FcH"/>
                         <outlet property="titleLabel" destination="V8M-uE-GiA" id="xBV-n4-LDm"/>
-                        <segue destination="znE-hs-ez8" kind="presentation" identifier="Show Canvas" id="NTo-Rs-Vwv"/>
+                        <segue destination="znE-hs-ez8" kind="presentation" identifier="Show Canvas" animates="NO" id="NTo-Rs-Vwv"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -134,7 +134,6 @@
                                 <segments>
                                     <segment title="4 x 6"/>
                                     <segment title="5 x 7"/>
-                                    <segment title="8.5 x 11"/>
                                 </segments>
                             </segmentedControl>
                             <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="Tbb-UU-OVn" userLabel="Orientation Segment View">

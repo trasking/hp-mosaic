@@ -13,6 +13,7 @@
 		655AFD111BFD92A6006E0C6E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 655AFD0F1BFD92A6006E0C6E /* Main.storyboard */; };
 		655AFD131BFD92A6006E0C6E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 655AFD121BFD92A6006E0C6E /* Assets.xcassets */; };
 		655AFD161BFD92A6006E0C6E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 655AFD141BFD92A6006E0C6E /* LaunchScreen.storyboard */; };
+		65613B2B1BFEC5750016AD21 /* HMGridButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 65613B2A1BFEC5750016AD21 /* HMGridButton.m */; };
 		65D649B91BFE99D60093B085 /* HMCanvasViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 65D649B81BFE99D60093B085 /* HMCanvasViewController.m */; };
 		65DEF1041BFEA946003879D7 /* HMSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 65DEF1031BFEA946003879D7 /* HMSettingsViewController.m */; };
 		939CF945DD3485379C27D274 /* libPods-HPMosaic.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 41E2172D3153F2067401BD79 /* libPods-HPMosaic.a */; };
@@ -31,6 +32,8 @@
 		655AFD121BFD92A6006E0C6E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		655AFD151BFD92A6006E0C6E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		655AFD171BFD92A6006E0C6E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		65613B291BFEC5750016AD21 /* HMGridButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HMGridButton.h; sourceTree = "<group>"; };
+		65613B2A1BFEC5750016AD21 /* HMGridButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HMGridButton.m; sourceTree = "<group>"; };
 		65D649B71BFE99D60093B085 /* HMCanvasViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HMCanvasViewController.h; sourceTree = "<group>"; };
 		65D649B81BFE99D60093B085 /* HMCanvasViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HMCanvasViewController.m; sourceTree = "<group>"; };
 		65DEF1021BFEA946003879D7 /* HMSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HMSettingsViewController.h; sourceTree = "<group>"; };
@@ -101,6 +104,8 @@
 				65D649B81BFE99D60093B085 /* HMCanvasViewController.m */,
 				65DEF1021BFEA946003879D7 /* HMSettingsViewController.h */,
 				65DEF1031BFEA946003879D7 /* HMSettingsViewController.m */,
+				65613B291BFEC5750016AD21 /* HMGridButton.h */,
+				65613B2A1BFEC5750016AD21 /* HMGridButton.m */,
 			);
 			path = HPMosaic;
 			sourceTree = "<group>";
@@ -239,6 +244,7 @@
 				655AFD0E1BFD92A6006E0C6E /* HMLaunchViewController.m in Sources */,
 				655AFD0B1BFD92A6006E0C6E /* AppDelegate.m in Sources */,
 				655AFD081BFD92A6006E0C6E /* main.m in Sources */,
+				65613B2B1BFEC5750016AD21 /* HMGridButton.m in Sources */,
 				65D649B91BFE99D60093B085 /* HMCanvasViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
