@@ -2,7 +2,7 @@
 //  HMGridButton.m
 //  HPMosaic
 //
-//  Created by James Trask on 11/19/15.
+//  Created by HP Inc. on 11/19/15.
 //  Copyright © 2015 Pilots & Incubation. All rights reserved.
 //
 

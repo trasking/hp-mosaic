@@ -15,6 +15,7 @@
 		655AFD161BFD92A6006E0C6E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 655AFD141BFD92A6006E0C6E /* LaunchScreen.storyboard */; };
 		65613B2B1BFEC5750016AD21 /* HMGridButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 65613B2A1BFEC5750016AD21 /* HMGridButton.m */; };
 		65D649B91BFE99D60093B085 /* HMCanvasViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 65D649B81BFE99D60093B085 /* HMCanvasViewController.m */; };
+		65DA60AD1BFF02CD00FB5D0C /* HMScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 65DA60AC1BFF02CD00FB5D0C /* HMScrollView.m */; };
 		65DEF1041BFEA946003879D7 /* HMSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 65DEF1031BFEA946003879D7 /* HMSettingsViewController.m */; };
 		939CF945DD3485379C27D274 /* libPods-HPMosaic.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 41E2172D3153F2067401BD79 /* libPods-HPMosaic.a */; };
 /* End PBXBuildFile section */
@@ -36,6 +37,8 @@
 		65613B2A1BFEC5750016AD21 /* HMGridButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HMGridButton.m; sourceTree = "<group>"; };
 		65D649B71BFE99D60093B085 /* HMCanvasViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HMCanvasViewController.h; sourceTree = "<group>"; };
 		65D649B81BFE99D60093B085 /* HMCanvasViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HMCanvasViewController.m; sourceTree = "<group>"; };
+		65DA60AB1BFF02CD00FB5D0C /* HMScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HMScrollView.h; sourceTree = "<group>"; };
+		65DA60AC1BFF02CD00FB5D0C /* HMScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HMScrollView.m; sourceTree = "<group>"; };
 		65DEF1021BFEA946003879D7 /* HMSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HMSettingsViewController.h; sourceTree = "<group>"; };
 		65DEF1031BFEA946003879D7 /* HMSettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HMSettingsViewController.m; sourceTree = "<group>"; };
 		EDF2751A6D3C3E3B7EE0E22A /* Pods-HPMosaic.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HPMosaic.debug.xcconfig"; path = "Pods/Target Support Files/Pods-HPMosaic/Pods-HPMosaic.debug.xcconfig"; sourceTree = "<group>"; };
@@ -106,6 +109,8 @@
 				65DEF1031BFEA946003879D7 /* HMSettingsViewController.m */,
 				65613B291BFEC5750016AD21 /* HMGridButton.h */,
 				65613B2A1BFEC5750016AD21 /* HMGridButton.m */,
+				65DA60AB1BFF02CD00FB5D0C /* HMScrollView.h */,
+				65DA60AC1BFF02CD00FB5D0C /* HMScrollView.m */,
 			);
 			path = HPMosaic;
 			sourceTree = "<group>";
@@ -243,6 +248,7 @@
 				65DEF1041BFEA946003879D7 /* HMSettingsViewController.m in Sources */,
 				655AFD0E1BFD92A6006E0C6E /* HMLaunchViewController.m in Sources */,
 				655AFD0B1BFD92A6006E0C6E /* AppDelegate.m in Sources */,
+				65DA60AD1BFF02CD00FB5D0C /* HMScrollView.m in Sources */,
 				655AFD081BFD92A6006E0C6E /* main.m in Sources */,
 				65613B2B1BFEC5750016AD21 /* HMGridButton.m in Sources */,
 				65D649B91BFE99D60093B085 /* HMCanvasViewController.m in Sources */,

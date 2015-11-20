@@ -2,18 +2,18 @@
 //  HMCanvasViewController.m
 //  HPMosaic
 //
-//  Created by James Trask on 11/19/15.
+//  Created by HP Inc. on 11/19/15.
 //  Copyright © 2015 Pilots & Incubation. All rights reserved.
 //
 
 #import "HMCanvasViewController.h"
 #import "HMSettingsViewController.h"
+#import "HMScrollView.h"
 
 @interface HMCanvasViewController () <HMSettingsViewControllerDelegate>
 
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *editBarButtonItem;
-@property (assign, nonatomic) CGSize gridSize;
-@property (assign, nonatomic) CGSize paperSize;
+@property (weak, nonatomic) IBOutlet HMScrollView *scrollView;
 
 @end
 
@@ -34,13 +34,19 @@ CGFloat const kHMDefaultPaperHeight = 6.0;
     [self loadFromUserDefaults];
 }
 
+- (void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    self.scrollView.image = [UIImage imageNamed:@"Sample Image"];
+}
+
 - (IBAction)settingsButtonTapped:(id)sender {
 
     UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]];
     HMSettingsViewController *vc = (HMSettingsViewController *)[storyboard instantiateViewControllerWithIdentifier:@"HMSettingsViewController"];
     vc.delegate = self;
-    vc.selectedGridSize = self.gridSize;
-    vc.selectedPaperSize = self.paperSize;
+    vc.selectedGridSize = self.scrollView.gridSize;
+    vc.selectedPaperSize = self.scrollView.paperSize;
     vc.modalPresentationStyle = UIModalPresentationPopover;
     [self presentViewController:vc animated: YES completion:nil];
     UIPopoverPresentationController *presentationController = [vc popoverPresentationController];
@@ -52,8 +58,8 @@ CGFloat const kHMDefaultPaperHeight = 6.0;
 
 - (void)settingsDidChange:(HMSettingsViewController *)settingsController
 {
-    self.gridSize = settingsController.selectedGridSize;
-    self.paperSize = settingsController.selectedPaperSize;
+    self.scrollView.gridSize = settingsController.selectedGridSize;
+    self.scrollView.paperSize = settingsController.selectedPaperSize;
     [self saveToUserDefaults];
 }
 
@@ -66,23 +72,23 @@ CGFloat const kHMDefaultPaperHeight = 6.0;
     NSNumber *paperWidth = [[NSUserDefaults standardUserDefaults] objectForKey:kHMPaperWidthKey];
     NSNumber *paperHeight = [[NSUserDefaults standardUserDefaults] objectForKey:kHMPaperHeightKey];
     if (gridWidth && gridHeight) {
-        self.gridSize = CGSizeMake([gridWidth floatValue], [gridHeight floatValue]);
+        self.scrollView.gridSize = CGSizeMake([gridWidth floatValue], [gridHeight floatValue]);
     } else {
-        self.gridSize = CGSizeMake(kHMDefaultGridWidth, kHMDefaultGridHeight);
+        self.scrollView.gridSize = CGSizeMake(kHMDefaultGridWidth, kHMDefaultGridHeight);
     }
     if (paperWidth && paperHeight) {
-        self.paperSize = CGSizeMake([paperWidth floatValue], [paperHeight floatValue]);
+        self.scrollView.paperSize = CGSizeMake([paperWidth floatValue], [paperHeight floatValue]);
     } else {
-        self.paperSize = CGSizeMake(kHMDefaultPaperWidth, kHMDefaultPaperHeight);
+        self.scrollView.paperSize = CGSizeMake(kHMDefaultPaperWidth, kHMDefaultPaperHeight);
     }
 }
 
 - (void)saveToUserDefaults
 {
-    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithFloat:self.gridSize.width] forKey:kHMGridWidthKey];
-    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithFloat:self.gridSize.height] forKey:kHMGridHeightKey];
-    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithFloat:self.paperSize.width] forKey:kHMPaperWidthKey];
-    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithFloat:self.paperSize.height] forKey:kHMPaperHeightKey];
+    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithFloat:self.scrollView.gridSize.width] forKey:kHMGridWidthKey];
+    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithFloat:self.scrollView.gridSize.height] forKey:kHMGridHeightKey];
+    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithFloat:self.scrollView.paperSize.width] forKey:kHMPaperWidthKey];
+    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithFloat:self.scrollView.paperSize.height] forKey:kHMPaperHeightKey];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
