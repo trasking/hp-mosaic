@@ -79,12 +79,14 @@
                         <animations/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="k0A-6U-dMh" firstAttribute="top" secondItem="Bpl-eB-l4n" secondAttribute="bottom" priority="100" constant="20" id="9W9-Rs-CXh"/>
+                            <constraint firstItem="k0A-6U-dMh" firstAttribute="top" relation="greaterThanOrEqual" secondItem="Bpl-eB-l4n" secondAttribute="bottom" constant="20" id="9W9-Rs-CXh"/>
                             <constraint firstItem="Bpl-eB-l4n" firstAttribute="centerX" secondItem="3AJ-Rr-qIs" secondAttribute="centerX" id="CVx-ep-PRG"/>
-                            <constraint firstItem="Bpl-eB-l4n" firstAttribute="leading" secondItem="3AJ-Rr-qIs" secondAttribute="leading" priority="100" constant="20" id="Psi-cw-gbk"/>
+                            <constraint firstItem="Bpl-eB-l4n" firstAttribute="width" secondItem="3AJ-Rr-qIs" secondAttribute="width" priority="100" id="FVJ-JA-EHO"/>
+                            <constraint firstItem="Bpl-eB-l4n" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="3AJ-Rr-qIs" secondAttribute="leading" constant="20" id="Psi-cw-gbk"/>
                             <constraint firstItem="Bpl-eB-l4n" firstAttribute="centerY" secondItem="3AJ-Rr-qIs" secondAttribute="centerY" id="Z1X-9K-fAt"/>
-                            <constraint firstItem="Bpl-eB-l4n" firstAttribute="top" secondItem="L77-eI-rbx" secondAttribute="bottom" priority="100" constant="20" id="asf-BO-r7X"/>
-                            <constraint firstAttribute="trailing" secondItem="Bpl-eB-l4n" secondAttribute="trailing" priority="100" constant="20" id="yjB-lI-IED"/>
+                            <constraint firstItem="Bpl-eB-l4n" firstAttribute="top" relation="greaterThanOrEqual" secondItem="L77-eI-rbx" secondAttribute="bottom" constant="20" id="asf-BO-r7X"/>
+                            <constraint firstItem="Bpl-eB-l4n" firstAttribute="height" secondItem="3AJ-Rr-qIs" secondAttribute="height" priority="100" id="euo-0e-yMm"/>
+                            <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="Bpl-eB-l4n" secondAttribute="trailing" constant="20" id="yjB-lI-IED"/>
                         </constraints>
                     </view>
                     <extendedEdge key="edgesForExtendedLayout"/>

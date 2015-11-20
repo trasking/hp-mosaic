@@ -42,6 +42,15 @@ CGFloat const kHMDefaultPaperHeight = 6.0;
     self.scrollView.image = [UIImage imageNamed:@"Sample Image"];
 }
 
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
+{
+        [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
+            [self.scrollView setNeedsDisplay];
+        } completion:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
+            [self.scrollView setNeedsDisplay];
+        }];
+}
+
 #pragma mark - HMSettingsViewControllerDelegate
 
 - (void)settingsDidChange:(HMSettingsViewController *)settingsController

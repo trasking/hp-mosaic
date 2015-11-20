@@ -11,18 +11,74 @@
 @interface HMScrollView()
 
 @property (strong, nonatomic) NSLayoutConstraint *aspectRatioConstraint;
+@property (strong, nonatomic) CAShapeLayer *gridLayer;
+@property (strong, nonatomic) UIView *gridView;
 
 @end
 
 @implementation HMScrollView
 
-/*
- // Only override drawRect: if you perform custom drawing.
- // An empty implementation adversely affects performance during animation.
- - (void)drawRect:(CGRect)rect {
- // Drawing code
- }
- */
+CGFloat kHMScrollViewGridStokeWidth = 10.0;
+
+- (void)drawRect:(CGRect)rect {
+
+    if (!self.gridView) {
+        self.gridView = [[UIView alloc] initWithFrame:CGRectZero];
+        self.gridView.userInteractionEnabled = NO;
+        [self.superview addSubview:self.gridView];
+    }
+    self.gridView.frame = self.frame;
+    
+    if (self.gridLayer) {
+        [self.gridLayer removeFromSuperlayer];
+    }
+    
+    CAShapeLayer *gridLayer = [CAShapeLayer layer];
+    
+    UIBezierPath *path = [UIBezierPath bezierPath];
+    
+    CGFloat columnWidth = self.bounds.size.width / (float)self.gridSize.width;
+    for (int column = 0; column <= self.gridSize.width; column++) {
+        CGFloat x = column * columnWidth;
+        [path moveToPoint:CGPointMake(x, 0.0)];
+        [path addLineToPoint:CGPointMake(x, self.bounds.size.height)];
+    }
+    
+    CGFloat rowHeight = self.bounds.size.height / (float)self.gridSize.height;
+    for (int row = 0; row <= self.gridSize.height; row++) {
+        CGFloat y = row * rowHeight;
+        [path moveToPoint:CGPointMake(0.0, y)];
+        [path addLineToPoint:CGPointMake(self.bounds.size.width, y)];
+    }
+    
+    gridLayer.lineWidth = kHMScrollViewGridStokeWidth;
+    gridLayer.path = path.CGPath;
+    gridLayer.strokeColor = [[UIColor whiteColor] CGColor];
+    
+    [self.gridView.layer addSublayer:gridLayer];
+    self.gridLayer = gridLayer;
+    
+    //     CGContextRef context = UIGraphicsGetCurrentContext();
+    //     CGContextSetStrokeColorWithColor(context, [[UIColor whiteColor] CGColor]);
+    //     CGContextSetLineWidth(context, kHMScrollViewGridStokeWidth);
+    //
+    //     CGFloat columnWidth = self.bounds.size.width / (float)self.gridSize.width;
+    //     for (int column = 0; column <= self.gridSize.width; column++) {
+    //         CGFloat x = column * columnWidth;
+    //         CGContextMoveToPoint(context, x, 0.0);
+    //         CGContextAddLineToPoint(context, x, self.bounds.size.height);
+    //     }
+    //
+    //     CGFloat rowHeight = self.bounds.size.height / (float)self.gridSize.height;
+    //     for (int row = 0; row <= self.gridSize.height; row++) {
+    //         CGFloat y = row * rowHeight;
+    //         CGContextMoveToPoint(context, 0.0, y);
+    //         CGContextAddLineToPoint(context, self.bounds.size.width, y);
+    //     }
+    //
+    //     CGContextDrawPath(context, kCGPathStroke);
+    
+}
 
 - (void)setGridSize:(CGSize)gridSize
 {
@@ -49,6 +105,7 @@
     }
     
     [self needsUpdateConstraints];
+    [self setNeedsDisplay];
 }
 
 - (void)setImage:(UIImage *)image
@@ -65,6 +122,7 @@
     self.contentOffset = CGPointZero;
     self.contentInset = UIEdgeInsetsZero;
     self.contentSize = contentView.bounds.size;
+    [self setNeedsDisplay];
 }
 
 @end
