@@ -4,6 +4,7 @@
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9051"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
     </dependencies>
     <scenes>
@@ -62,29 +63,27 @@
             <objects>
                 <viewController storyboardIdentifier="HMCanvasViewController" id="jZs-9H-nb7" customClass="HMCanvasViewController" sceneMemberID="viewController">
                     <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="jpz-oH-fht"/>
-                        <viewControllerLayoutGuide type="bottom" id="yU4-ah-2EI"/>
+                        <viewControllerLayoutGuide type="top" id="L77-eI-rbx"/>
+                        <viewControllerLayoutGuide type="bottom" id="k0A-6U-dMh"/>
                     </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="Asl-ch-Pkx" userLabel="Main View">
-                        <rect key="frame" x="0.0" y="64" width="600" height="492"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="TSf-mg-yNl" userLabel="Background View">
-                                <rect key="frame" x="2" y="0.0" width="600" height="492"/>
-                                <animations/>
-                                <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
-                            </view>
-                        </subviews>
+                    <view key="view" contentMode="scaleToFill" id="3AJ-Rr-qIs" userLabel="Main View">
+                        <rect key="frame" x="0.0" y="64" width="600" height="536"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <animations/>
-                        <constraints>
-                            <constraint firstAttribute="trailing" secondItem="TSf-mg-yNl" secondAttribute="trailing" id="DAC-Kp-qPi"/>
-                            <constraint firstItem="yU4-ah-2EI" firstAttribute="top" secondItem="TSf-mg-yNl" secondAttribute="bottom" id="bQP-Zl-ayZ"/>
-                            <constraint firstItem="TSf-mg-yNl" firstAttribute="leading" secondItem="Asl-ch-Pkx" secondAttribute="leading" id="iSI-bf-yGd"/>
-                            <constraint firstItem="TSf-mg-yNl" firstAttribute="top" secondItem="jpz-oH-fht" secondAttribute="bottom" id="x2K-7C-jmB"/>
-                        </constraints>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     </view>
                     <extendedEdge key="edgesForExtendedLayout"/>
-                    <navigationItem key="navigationItem" id="nDl-jh-LTp"/>
+                    <toolbarItems/>
+                    <navigationItem key="navigationItem" id="nDl-jh-LTp">
+                        <barButtonItem key="leftBarButtonItem" title="Edit" id="W2m-Zr-VCq">
+                            <connections>
+                                <action selector="editButtonTapped:" destination="jZs-9H-nb7" id="ZAN-1j-mgy"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="editBarButtonItem" destination="W2m-Zr-VCq" id="uhg-jM-jrh"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="HRJ-Zr-wVY" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -93,7 +92,7 @@
         <!--Navigation Controller-->
         <scene sceneID="PqR-iq-SyE">
             <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" toolbarHidden="NO" id="znE-hs-ez8" sceneMemberID="viewController">
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="znE-hs-ez8" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="iNI-bX-boI">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
@@ -113,6 +112,70 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="7nd-KU-zJv" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="867" y="748"/>
+        </scene>
+        <!--Settings View Controller-->
+        <scene sceneID="eKF-zl-Jby">
+            <objects>
+                <viewController storyboardIdentifier="HMSettingsViewController" id="3Lr-eT-4Qs" userLabel="Settings View Controller" customClass="HMSettingsViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="wCL-NT-NRx"/>
+                        <viewControllerLayoutGuide type="bottom" id="MWO-tN-5Ra"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="B04-vf-Tg0" userLabel="Main View">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="VFZ-zV-H9o" userLabel="Paper Segment View">
+                                <rect key="frame" x="20" y="40" width="560" height="45"/>
+                                <animations/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="44" id="HFb-Cd-yeX"/>
+                                </constraints>
+                                <segments>
+                                    <segment title="4 x 6"/>
+                                    <segment title="5 x 7"/>
+                                    <segment title="8.5 x 11"/>
+                                </segments>
+                            </segmentedControl>
+                            <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="Tbb-UU-OVn" userLabel="Orientation Segment View">
+                                <rect key="frame" x="20" y="104" width="560" height="45"/>
+                                <animations/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="44" id="aKh-6j-763"/>
+                                </constraints>
+                                <segments>
+                                    <segment title="Portrait"/>
+                                    <segment title="Landscape"/>
+                                </segments>
+                            </segmentedControl>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="RnT-QB-hS6" userLabel="Grid View">
+                                <rect key="frame" x="20" y="168" width="560" height="412"/>
+                                <animations/>
+                                <color key="backgroundColor" red="1" green="0.0" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                            </view>
+                        </subviews>
+                        <animations/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="MWO-tN-5Ra" firstAttribute="top" secondItem="RnT-QB-hS6" secondAttribute="bottom" constant="20" id="0yf-QU-wXS"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="Tbb-UU-OVn" secondAttribute="trailing" id="3dD-FK-tGs"/>
+                            <constraint firstItem="Tbb-UU-OVn" firstAttribute="top" secondItem="VFZ-zV-H9o" secondAttribute="bottom" constant="20" id="5cx-H7-dq2"/>
+                            <constraint firstAttribute="leadingMargin" secondItem="VFZ-zV-H9o" secondAttribute="leading" id="E8S-vs-Qae"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="RnT-QB-hS6" secondAttribute="trailing" id="FVl-Rc-Kip"/>
+                            <constraint firstItem="VFZ-zV-H9o" firstAttribute="top" secondItem="wCL-NT-NRx" secondAttribute="bottom" constant="20" id="N7a-ug-rs9"/>
+                            <constraint firstItem="RnT-QB-hS6" firstAttribute="top" secondItem="Tbb-UU-OVn" secondAttribute="bottom" constant="20" id="SAR-ge-pIi"/>
+                            <constraint firstAttribute="leadingMargin" secondItem="Tbb-UU-OVn" secondAttribute="leading" id="VsP-jM-hMw"/>
+                            <constraint firstItem="RnT-QB-hS6" firstAttribute="leading" secondItem="B04-vf-Tg0" secondAttribute="leadingMargin" id="r2v-MF-C3c"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="VFZ-zV-H9o" secondAttribute="trailing" id="vKS-1D-QFE"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="gridView" destination="RnT-QB-hS6" id="GBA-Hv-736"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="mhb-ZL-ntv" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="857" y="1484"/>
         </scene>
     </scenes>
     <resources>

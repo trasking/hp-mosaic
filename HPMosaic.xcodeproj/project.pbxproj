@@ -14,6 +14,7 @@
 		655AFD131BFD92A6006E0C6E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 655AFD121BFD92A6006E0C6E /* Assets.xcassets */; };
 		655AFD161BFD92A6006E0C6E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 655AFD141BFD92A6006E0C6E /* LaunchScreen.storyboard */; };
 		65D649B91BFE99D60093B085 /* HMCanvasViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 65D649B81BFE99D60093B085 /* HMCanvasViewController.m */; };
+		65DEF1041BFEA946003879D7 /* HMSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 65DEF1031BFEA946003879D7 /* HMSettingsViewController.m */; };
 		939CF945DD3485379C27D274 /* libPods-HPMosaic.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 41E2172D3153F2067401BD79 /* libPods-HPMosaic.a */; };
 /* End PBXBuildFile section */
 
@@ -32,6 +33,8 @@
 		655AFD171BFD92A6006E0C6E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		65D649B71BFE99D60093B085 /* HMCanvasViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HMCanvasViewController.h; sourceTree = "<group>"; };
 		65D649B81BFE99D60093B085 /* HMCanvasViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HMCanvasViewController.m; sourceTree = "<group>"; };
+		65DEF1021BFEA946003879D7 /* HMSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HMSettingsViewController.h; sourceTree = "<group>"; };
+		65DEF1031BFEA946003879D7 /* HMSettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HMSettingsViewController.m; sourceTree = "<group>"; };
 		EDF2751A6D3C3E3B7EE0E22A /* Pods-HPMosaic.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HPMosaic.debug.xcconfig"; path = "Pods/Target Support Files/Pods-HPMosaic/Pods-HPMosaic.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -96,6 +99,8 @@
 				655AFD061BFD92A6006E0C6E /* Supporting Files */,
 				65D649B71BFE99D60093B085 /* HMCanvasViewController.h */,
 				65D649B81BFE99D60093B085 /* HMCanvasViewController.m */,
+				65DEF1021BFEA946003879D7 /* HMSettingsViewController.h */,
+				65DEF1031BFEA946003879D7 /* HMSettingsViewController.m */,
 			);
 			path = HPMosaic;
 			sourceTree = "<group>";
@@ -230,6 +235,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				65DEF1041BFEA946003879D7 /* HMSettingsViewController.m in Sources */,
 				655AFD0E1BFD92A6006E0C6E /* HMLaunchViewController.m in Sources */,
 				655AFD0B1BFD92A6006E0C6E /* AppDelegate.m in Sources */,
 				655AFD081BFD92A6006E0C6E /* main.m in Sources */,
