@@ -10,4 +10,7 @@
 
 @interface HMSettingsViewController : UIViewController
 
+@property (assign, nonatomic) CGSize selectedGridSize;
+@property (assign, nonatomic) CGSize selectedPaperSize;
+
 @end

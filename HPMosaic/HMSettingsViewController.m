@@ -13,25 +13,36 @@
 
 @property (weak, nonatomic) IBOutlet UIView *gridView;
 @property (strong, nonatomic) NSMutableArray<HMGridButton *> *gridButtons;
-@property (assign, nonatomic) CGSize selectedSize;
+@property (weak, nonatomic) IBOutlet UILabel *sizeLabel;
+@property (weak, nonatomic) IBOutlet UISegmentedControl *paperSizeSegmentedControl;
+@property (weak, nonatomic) IBOutlet UISegmentedControl *orientationSegmentedControl;
 
 @end
 
 @implementation HMSettingsViewController
 
-NSUInteger kHMTotalRows = 5;
-NSUInteger kHMTotalColumns = 5;
+NSUInteger const kHMTotalRows = 5;
+NSUInteger const kHMTotalColumns = 5;
+
+NSUInteger const kHMDefaultRows = 1;
+NSUInteger const kHMDefaultColumns = 3;
+
+CGFloat const kHMDefaultPaperWidth = 4.0;
+CGFloat const kHMDefaultPaperHeight = 6.0;
+
+NSUInteger const kHMPaper4x6SegmentIndex = 0;
+NSUInteger const kHMPaper5x7SegmentIndex = 1;
+
+NSUInteger const kHMPaperPortraitSegmentIndex = 0;
+NSUInteger const kHMPaperLandscapeSegmentIndex = 1;
 
 #pragma mark - Initialization
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.gridButtons = [NSMutableArray array];
-    for (int row = 0; row < kHMTotalRows; row++) {
-        for (int column = 0; column < kHMTotalColumns; column++) {
-            [self addButtonRow:row column:column];
-        }
-    }
+    [self setupGrid];
+    [self setupPaper];
+    [self refreshSettings];
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
@@ -50,6 +61,29 @@ NSUInteger kHMTotalColumns = 5;
 
 - (IBAction)doneButtonTapped:(id)sender {
     [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)setupGrid
+{
+    if (CGSizeEqualToSize(CGSizeZero, self.selectedGridSize)) {
+        self.selectedGridSize = CGSizeMake(kHMDefaultColumns, kHMDefaultRows);
+    }
+    self.gridButtons = [NSMutableArray array];
+    for (int row = 0; row < kHMTotalRows; row++) {
+        for (int column = 0; column < kHMTotalColumns; column++) {
+            [self addButtonRow:row column:column];
+        }
+    }
+}
+
+- (void)setupPaper
+{
+    if (CGSizeEqualToSize(CGSizeZero, self.selectedPaperSize)) {
+        self.selectedPaperSize = CGSizeMake(kHMDefaultPaperWidth, kHMDefaultPaperHeight);
+        
+    }
+    self.orientationSegmentedControl.selectedSegmentIndex = self.selectedPaperSize.width > self.selectedPaperSize.height ? kHMPaperLandscapeSegmentIndex : kHMPaperPortraitSegmentIndex;
+    self.paperSizeSegmentedControl.selectedSegmentIndex = 4.0 == fminf(self.selectedPaperSize.width, self.selectedPaperSize.height) ? kHMPaper4x6SegmentIndex : kHMPaper5x7SegmentIndex;
 }
 
 #pragma mark - Buttons
@@ -118,18 +152,67 @@ NSUInteger kHMTotalColumns = 5;
     UIButton *button = sender;
     NSUInteger selectedRow = button.tag / kHMTotalColumns;
     NSUInteger selectedColumn = button.tag - (selectedRow * kHMTotalColumns);
-    self.selectedSize = CGSizeMake(selectedColumn + 1, selectedRow + 1);
+    self.selectedGridSize = CGSizeMake(selectedColumn + 1, selectedRow + 1);
+    [self refreshSettings];
+}
+
+- (IBAction)paperSegmentValueChanged:(id)sender {
+    [self refreshSettings];
+}
+
+- (IBAction)orientationSegmentValueChanged:(id)sender {
+    [self refreshSettings];
+}
+
+#pragma mark - Refresh
+
+- (void)refreshSettings
+{
+    
     [self refreshButtons];
+    [self refreshSizeLabel];
 }
 
 - (void)refreshButtons
 {
     for (int row = 0; row < kHMTotalRows; row++) {
         for (int column = 0; column < kHMTotalColumns; column++) {
-            BOOL included = row <= self.selectedSize.height - 1 && column <= self.selectedSize.width - 1;
+            BOOL included = row <= self.selectedGridSize.height - 1 && column <= self.selectedGridSize.width - 1;
             self.gridButtons[kHMTotalColumns * row + column].included = included;
         }
     }
+}
+
+- (void)refreshSizeLabel
+{
+    NSString *rowLabel = [NSString stringWithFormat:@"%.0f row%@", self.selectedGridSize.height, self.selectedGridSize.height > 1 ? @"s" : @""];
+    NSString *columnLabel = [NSString stringWithFormat:@"%.0f column%@", self.selectedGridSize.width, self.selectedGridSize.width > 1 ? @"s" : @""];
+    
+    CGSize paperSize = [self paperSize];
+    CGFloat width = paperSize.width * self.selectedGridSize.width;
+    CGFloat height = paperSize.height * self.selectedGridSize.height;
+    
+    self.sizeLabel.text = [NSString stringWithFormat:@"%@ x %@ (%.0f\" x %.0f\")", columnLabel, rowLabel, width, height];
+}
+
+- (CGSize)paperSize
+{
+    CGFloat width = 4.0;
+    CGFloat height = 6.0;
+    if (kHMPaper4x6SegmentIndex == self.paperSizeSegmentedControl.selectedSegmentIndex &&
+        kHMPaperLandscapeSegmentIndex == self.orientationSegmentedControl.selectedSegmentIndex) {
+        width = 6.0;
+        height = 4.0;
+    } else if (kHMPaper5x7SegmentIndex == self.paperSizeSegmentedControl.selectedSegmentIndex &&
+               kHMPaperPortraitSegmentIndex == self.orientationSegmentedControl.selectedSegmentIndex) {
+        width = 5.0;
+        height = 7.0;
+    } else if (kHMPaper5x7SegmentIndex == self.paperSizeSegmentedControl.selectedSegmentIndex &&
+               kHMPaperLandscapeSegmentIndex == self.orientationSegmentedControl.selectedSegmentIndex) {
+        width = 7.0;
+        height = 5.0;
+    }
+    return CGSizeMake(width, height);
 }
 
 @end
