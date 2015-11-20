@@ -11,5 +11,7 @@
 @interface HMGridButton : UIButton
 
 @property (assign, nonatomic) BOOL included;
+@property (assign, nonatomic) BOOL right;
+@property (assign, nonatomic) BOOL bottom;
 
 @end

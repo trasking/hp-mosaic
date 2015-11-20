@@ -48,6 +48,10 @@ NSUInteger kHMTotalColumns = 5;
     }];
 }
 
+- (IBAction)doneButtonTapped:(id)sender {
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
 #pragma mark - Buttons
 
 - (void)addButtonRow:(NSUInteger)row column:(NSUInteger)column
@@ -59,7 +63,9 @@ NSUInteger kHMTotalColumns = 5;
     
     button.translatesAutoresizingMaskIntoConstraints = NO;
     button.tag = index;
-
+    button.right = (column == kHMTotalColumns - 1);
+    button.bottom = (row == kHMTotalRows - 1);
+    
     CGFloat widthPercent = 1.0 / (float)kHMTotalColumns;
     CGFloat widthMultiplier = ((float)column * widthPercent + 0.5 * widthPercent) / 0.5;
     
