@@ -24,12 +24,6 @@
 NSUInteger const kHMTotalRows = 5;
 NSUInteger const kHMTotalColumns = 5;
 
-NSUInteger const kHMDefaultRows = 1;
-NSUInteger const kHMDefaultColumns = 3;
-
-CGFloat const kHMDefaultPaperWidth = 4.0;
-CGFloat const kHMDefaultPaperHeight = 6.0;
-
 NSUInteger const kHMPaper4x6SegmentIndex = 0;
 NSUInteger const kHMPaper5x7SegmentIndex = 1;
 
@@ -65,9 +59,6 @@ NSUInteger const kHMPaperLandscapeSegmentIndex = 1;
 
 - (void)setupGrid
 {
-    if (CGSizeEqualToSize(CGSizeZero, self.selectedGridSize)) {
-        self.selectedGridSize = CGSizeMake(kHMDefaultColumns, kHMDefaultRows);
-    }
     self.gridButtons = [NSMutableArray array];
     for (int row = 0; row < kHMTotalRows; row++) {
         for (int column = 0; column < kHMTotalColumns; column++) {
@@ -78,10 +69,6 @@ NSUInteger const kHMPaperLandscapeSegmentIndex = 1;
 
 - (void)setupPaper
 {
-    if (CGSizeEqualToSize(CGSizeZero, self.selectedPaperSize)) {
-        self.selectedPaperSize = CGSizeMake(kHMDefaultPaperWidth, kHMDefaultPaperHeight);
-        
-    }
     self.orientationSegmentedControl.selectedSegmentIndex = self.selectedPaperSize.width > self.selectedPaperSize.height ? kHMPaperLandscapeSegmentIndex : kHMPaperPortraitSegmentIndex;
     self.paperSizeSegmentedControl.selectedSegmentIndex = 4.0 == fminf(self.selectedPaperSize.width, self.selectedPaperSize.height) ? kHMPaper4x6SegmentIndex : kHMPaper5x7SegmentIndex;
 }
@@ -157,10 +144,12 @@ NSUInteger const kHMPaperLandscapeSegmentIndex = 1;
 }
 
 - (IBAction)paperSegmentValueChanged:(id)sender {
+    self.selectedPaperSize = [self paperSize];
     [self refreshSettings];
 }
 
 - (IBAction)orientationSegmentValueChanged:(id)sender {
+    self.selectedPaperSize = [self paperSize];
     [self refreshSettings];
 }
 
@@ -168,9 +157,11 @@ NSUInteger const kHMPaperLandscapeSegmentIndex = 1;
 
 - (void)refreshSettings
 {
-    
     [self refreshButtons];
     [self refreshSizeLabel];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(settingsDidChange:)]) {
+        [self.delegate settingsDidChange:self];
+    }
 }
 
 - (void)refreshButtons
@@ -187,11 +178,8 @@ NSUInteger const kHMPaperLandscapeSegmentIndex = 1;
 {
     NSString *rowLabel = [NSString stringWithFormat:@"%.0f row%@", self.selectedGridSize.height, self.selectedGridSize.height > 1 ? @"s" : @""];
     NSString *columnLabel = [NSString stringWithFormat:@"%.0f column%@", self.selectedGridSize.width, self.selectedGridSize.width > 1 ? @"s" : @""];
-    
-    CGSize paperSize = [self paperSize];
-    CGFloat width = paperSize.width * self.selectedGridSize.width;
-    CGFloat height = paperSize.height * self.selectedGridSize.height;
-    
+    CGFloat width = self.selectedPaperSize.width * self.selectedGridSize.width;
+    CGFloat height = self.selectedPaperSize.height * self.selectedGridSize.height;
     self.sizeLabel.text = [NSString stringWithFormat:@"%@ x %@ (%.0f\" x %.0f\")", columnLabel, rowLabel, width, height];
 }
 

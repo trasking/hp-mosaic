@@ -8,9 +8,18 @@
 
 #import <UIKit/UIKit.h>
 
+@protocol HMSettingsViewControllerDelegate;
+
 @interface HMSettingsViewController : UIViewController
 
 @property (assign, nonatomic) CGSize selectedGridSize;
 @property (assign, nonatomic) CGSize selectedPaperSize;
+@property (weak, nonatomic) id<HMSettingsViewControllerDelegate>delegate;
+
+@end
+
+@protocol HMSettingsViewControllerDelegate <NSObject>
+
+- (void)settingsDidChange:(HMSettingsViewController *)settingsController;
 
 @end
