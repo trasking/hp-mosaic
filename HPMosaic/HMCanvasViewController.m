@@ -12,7 +12,7 @@
 
 @interface HMCanvasViewController () <HMSettingsViewControllerDelegate>
 
-@property (weak, nonatomic) IBOutlet UIBarButtonItem *editBarButtonItem;
+@property (strong, nonatomic) UIBarButtonItem *settingsBarButtonItem;
 @property (weak, nonatomic) IBOutlet HMScrollView *scrollView;
 
 @end
@@ -32,26 +32,14 @@ CGFloat const kHMDefaultPaperHeight = 6.0;
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self loadFromUserDefaults];
+    [self prepareBarButtonItems];
 }
 
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
+    
     self.scrollView.image = [UIImage imageNamed:@"Sample Image"];
-}
-
-- (IBAction)settingsButtonTapped:(id)sender {
-
-    UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]];
-    HMSettingsViewController *vc = (HMSettingsViewController *)[storyboard instantiateViewControllerWithIdentifier:@"HMSettingsViewController"];
-    vc.delegate = self;
-    vc.selectedGridSize = self.scrollView.gridSize;
-    vc.selectedPaperSize = self.scrollView.paperSize;
-    vc.modalPresentationStyle = UIModalPresentationPopover;
-    [self presentViewController:vc animated: YES completion:nil];
-    UIPopoverPresentationController *presentationController = [vc popoverPresentationController];
-    presentationController.permittedArrowDirections = UIPopoverArrowDirectionUp;
-    presentationController.barButtonItem = self.editBarButtonItem;
 }
 
 #pragma mark - HMSettingsViewControllerDelegate
@@ -90,6 +78,62 @@ CGFloat const kHMDefaultPaperHeight = 6.0;
     [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithFloat:self.scrollView.paperSize.width] forKey:kHMPaperWidthKey];
     [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithFloat:self.scrollView.paperSize.height] forKey:kHMPaperHeightKey];
     [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+#pragma mark - Choose Photo
+
+- (void)showPhotoSelection
+{
+    // TO DO
+}
+
+#pragma mark - Print
+
+- (void)showPrint
+{
+    // TO DO
+}
+
+#pragma mark - Settings
+
+- (void)showSettings
+{
+    UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]];
+    HMSettingsViewController *vc = (HMSettingsViewController *)[storyboard instantiateViewControllerWithIdentifier:@"HMSettingsViewController"];
+    vc.delegate = self;
+    vc.selectedGridSize = self.scrollView.gridSize;
+    vc.selectedPaperSize = self.scrollView.paperSize;
+    vc.modalPresentationStyle = UIModalPresentationPopover;
+    [self presentViewController:vc animated: YES completion:nil];
+    UIPopoverPresentationController *presentationController = [vc popoverPresentationController];
+    presentationController.permittedArrowDirections = UIPopoverArrowDirectionUp;
+    presentationController.barButtonItem = self.settingsBarButtonItem;
+}
+
+#pragma mark - Bar Button Items
+
+- (void)prepareBarButtonItems
+{
+    self.settingsBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Settings" style:UIBarButtonItemStylePlain target:self action:@selector(settingsButtonTapped:)];
+    self.navigationItem.leftBarButtonItem = self.settingsBarButtonItem;
+
+    UIBarButtonItem *chooseButton = [[UIBarButtonItem alloc] initWithTitle:@"Choose" style:UIBarButtonItemStylePlain target:self action:@selector(chooseButtonTapped:)];
+    UIBarButtonItem *printButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"Print Icon"] style:UIBarButtonItemStylePlain target:self action:@selector(printButtonTapped:)];
+    self.navigationItem.rightBarButtonItems = @[ chooseButton, printButton ];
+}
+
+- (void)chooseButtonTapped:(id)sender
+{
+    [self showPhotoSelection];
+}
+
+- (void)printButtonTapped:(id)sender
+{
+    [self showPrint];
+}
+
+- (void)settingsButtonTapped:(id)sender {
+    [self showSettings];
 }
 
 @end

@@ -8,6 +8,12 @@
 
 #import "HMScrollView.h"
 
+@interface HMScrollView()
+
+@property (strong, nonatomic) NSLayoutConstraint *aspectRatioConstraint;
+
+@end
+
 @implementation HMScrollView
 
 /*
@@ -17,6 +23,33 @@
  // Drawing code
  }
  */
+
+- (void)setGridSize:(CGSize)gridSize
+{
+    _gridSize = gridSize;
+    [self setAspectRatio];
+}
+
+- (void)setPaperSize:(CGSize)paperSize
+{
+    _paperSize = paperSize;
+    [self setAspectRatio];
+}
+
+- (void)setAspectRatio
+{
+    if (self.aspectRatioConstraint) {
+        self.aspectRatioConstraint.active = NO;
+    }
+    
+    if (!CGSizeEqualToSize(CGSizeZero, self.gridSize) && !CGSizeEqualToSize(CGSizeZero, self.paperSize)) {
+        CGFloat aspectRatio = (self.gridSize.width * self.paperSize.width) / (self.gridSize.height * self.paperSize.height);
+        self.aspectRatioConstraint = [NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeHeight multiplier:aspectRatio constant:0];
+        self.aspectRatioConstraint.active = YES;
+    }
+    
+    [self needsUpdateConstraints];
+}
 
 - (void)setImage:(UIImage *)image
 {
