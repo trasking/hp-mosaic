@@ -39,9 +39,14 @@ NSUInteger kHMTotalColumns = 5;
     
     button.translatesAutoresizingMaskIntoConstraints = NO;
     button.tag = index;
-    CGFloat alpha = (float)index / ((float)kHMTotalColumns * (float)kHMTotalRows);
-    button.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:alpha];
-    
+//    CGFloat alpha = (float)index / ((float)kHMTotalColumns * (float)kHMTotalRows);
+//    button.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:alpha];
+//    button.contentMode = UIViewContentModeScaleToFill;
+
+//    button.contentEdgeInsets = UIEdgeInsetsZero;
+//    button.imageEdgeInsets = UIEdgeInsetsZero;
+    [button setBackgroundImage:[UIImage imageNamed:@"Outline"] forState:UIControlStateNormal];
+
     CGFloat widthPercent = 1.0 / (float)kHMTotalColumns;
     CGFloat widthMultiplier = ((float)column * widthPercent + 0.5 * widthPercent) / 0.5;
     
@@ -85,15 +90,24 @@ NSUInteger kHMTotalColumns = 5;
     widthConstraint.active = YES;
     heightConstraint.active = YES;
     
-    [button addTarget:self action:@selector(handleGridButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+    [button addTarget:self action:@selector(handleGridButtonTapped:) forControlEvents:UIControlEventTouchDragEnter + UIControlEventTouchDown];
 }
 
 - (void)handleGridButtonTapped:(id)sender
 {
     UIButton *button = sender;
-    NSUInteger row = button.tag / kHMTotalColumns;
-    NSUInteger column = button.tag - (row * kHMTotalColumns);
-    NSLog(@"ROW: %d, COL: %d", row, column);
+    NSUInteger selectedRow = button.tag / kHMTotalColumns;
+    NSUInteger selectedColumn = button.tag - (selectedRow * kHMTotalColumns);
+    for (int row = 0; row < kHMTotalRows; row++) {
+        for (int column = 0; column < kHMTotalColumns; column++) {
+            UIColor *color = [UIColor whiteColor];
+            if (row <= selectedRow && column <= selectedColumn) {
+                color = [UIColor darkGrayColor];
+            }
+            self.gridButtons[kHMTotalColumns * row + column].backgroundColor = color;
+        }
+    }
+
 }
 
 @end
