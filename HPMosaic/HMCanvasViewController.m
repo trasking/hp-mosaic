@@ -24,8 +24,8 @@ NSString * const kHMGridHeightKey = @"kHMGridHeightKey";
 NSString * const kHMPaperWidthKey = @"kHMPaperWidthKey";
 NSString * const kHMPaperHeightKey = @"kHMPaperHeightKey";
 
-NSUInteger const kHMDefaultRows = 1;
-NSUInteger const kHMDefaultColumns = 3;
+NSUInteger const kHMDefaultGridHeight = 1;
+NSUInteger const kHMDefaultGridWidth = 3;
 CGFloat const kHMDefaultPaperWidth = 4.0;
 CGFloat const kHMDefaultPaperHeight = 6.0;
 
@@ -68,7 +68,7 @@ CGFloat const kHMDefaultPaperHeight = 6.0;
     if (gridWidth && gridHeight) {
         self.gridSize = CGSizeMake([gridWidth floatValue], [gridHeight floatValue]);
     } else {
-        self.gridSize = CGSizeMake(kHMDefaultColumns, kHMDefaultRows);
+        self.gridSize = CGSizeMake(kHMDefaultGridWidth, kHMDefaultGridHeight);
     }
     if (paperWidth && paperHeight) {
         self.paperSize = CGSizeMake([paperWidth floatValue], [paperHeight floatValue]);
