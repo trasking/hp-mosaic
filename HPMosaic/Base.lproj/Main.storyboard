@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9060" systemVersion="15B42" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
     <dependencies>
-        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9051"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
@@ -75,9 +74,9 @@
                     <extendedEdge key="edgesForExtendedLayout"/>
                     <toolbarItems/>
                     <navigationItem key="navigationItem" id="nDl-jh-LTp">
-                        <barButtonItem key="leftBarButtonItem" title="Edit" id="W2m-Zr-VCq">
+                        <barButtonItem key="leftBarButtonItem" title="Settings" id="W2m-Zr-VCq" userLabel="Settings Bar Button Item">
                             <connections>
-                                <action selector="editButtonTapped:" destination="jZs-9H-nb7" id="ZAN-1j-mgy"/>
+                                <action selector="settingsButtonTapped:" destination="jZs-9H-nb7" id="Y4B-HD-oHg"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>

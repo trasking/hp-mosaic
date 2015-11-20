@@ -34,7 +34,7 @@ CGFloat const kHMDefaultPaperHeight = 6.0;
     [self loadFromUserDefaults];
 }
 
-- (IBAction)editButtonTapped:(id)sender {
+- (IBAction)settingsButtonTapped:(id)sender {
 
     UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]];
     HMSettingsViewController *vc = (HMSettingsViewController *)[storyboard instantiateViewControllerWithIdentifier:@"HMSettingsViewController"];
