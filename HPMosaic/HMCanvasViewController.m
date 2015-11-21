@@ -152,11 +152,11 @@ CGFloat const kHMDefaultPaperHeight = 6.0;
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
-    CGFloat horizontalOffset = scrollView.contentOffset.x / scrollView.contentSize.width;
-    CGFloat verticalOffset = scrollView.contentOffset.y / scrollView.contentSize.height;
-    
-    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithFloat:horizontalOffset] forKey:kHMContentOffsetHorizontalKey];
-    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithFloat:verticalOffset] forKey:kHMContentOffsetVerticalKey];
+    HMScrollView *sv = (HMScrollView *)scrollView;
+    CGPoint centerPoint = CGPointMake(sv.contentOffset.x + sv.bounds.size.width / 2.0, sv.contentOffset.y + sv.bounds.size.height / 2.0);
+    sv.imageOffsetPercent = CGPointMake(centerPoint.x / (sv.image.size.width * sv.imageScale), centerPoint.y / (sv.image.size.height * sv.imageScale));
+    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithFloat:sv.imageOffsetPercent.x] forKey:kHMContentOffsetHorizontalKey];
+    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithFloat:sv.imageOffsetPercent.y] forKey:kHMContentOffsetVerticalKey];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 

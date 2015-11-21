@@ -10,6 +10,8 @@
 
 @interface HMScrollView : UIScrollView
 
+@property (assign, nonatomic, readonly) CGFloat imageScale;
+@property (assign, nonatomic) CGPoint imageOffsetPercent;
 @property (assign, nonatomic) CGSize gridSize;
 @property (assign, nonatomic) CGSize paperSize;
 @property (strong, nonatomic) UIImage *image;
