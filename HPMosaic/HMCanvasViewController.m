@@ -45,9 +45,9 @@ CGFloat const kHMDefaultPaperHeight = 6.0;
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
         [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
-            [self.scrollView setNeedsDisplay];
+            [self.scrollView updateLayout];
         } completion:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
-            [self.scrollView setNeedsDisplay];
+            [self.scrollView updateLayout];
         }];
 }
 

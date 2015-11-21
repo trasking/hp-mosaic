@@ -14,4 +14,6 @@
 @property (assign, nonatomic) CGSize paperSize;
 @property (strong, nonatomic) UIImage *image;
 
+- (void)updateLayout;
+
 @end
