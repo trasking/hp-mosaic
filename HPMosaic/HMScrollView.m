@@ -85,32 +85,44 @@ CGFloat kHMGridOpacity = 0.9;
         CGFloat aspectRatio = (self.gridSize.width * self.paperSize.width) / (self.gridSize.height * self.paperSize.height);
         self.aspectRatioConstraint = [NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeHeight multiplier:aspectRatio constant:0];
         self.aspectRatioConstraint.active = YES;
+        [self needsUpdateConstraints];
+        [self setNeedsDisplay];
     }
     
-    [self needsUpdateConstraints];
-    [self setNeedsDisplay];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self updateImageView];
+    });
 }
 
 - (void)setImage:(UIImage *)image
 {
     _image = image;
-    [self updateLayout];
+    [self updateImageView];
+}
+
+- (void)updateImageView
+{
+    if (self.image) {
+        [self.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
+        CGFloat xScale = self.bounds.size.width / self.image.size.width;
+        CGFloat yScale = self.bounds.size.height / self.image.size.height;
+        CGFloat scale = fmaxf(xScale, yScale);
+        UIImageView *contentView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.image.size.width * scale, self.image.size.height * scale)];
+        contentView.backgroundColor = [UIColor blackColor];
+        contentView.contentMode = UIViewContentModeScaleAspectFit;
+        contentView.image = self.image;
+        [self addSubview:contentView];
+        self.contentOffset = CGPointZero;
+        self.contentInset = UIEdgeInsetsZero;
+        self.contentSize = contentView.bounds.size;
+        [self setNeedsDisplay];
+        [self setNeedsLayout];
+    }
 }
 
 - (void)updateLayout
 {
-    [self.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    CGFloat xScale = self.bounds.size.width / self.image.size.width;
-    CGFloat yScale = self.bounds.size.height / self.image.size.height;
-    CGFloat scale = fmaxf(xScale, yScale);
-    UIImageView *contentView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.image.size.width * scale, self.image.size.height * scale)];
-    contentView.backgroundColor = [UIColor blackColor];
-    contentView.contentMode = UIViewContentModeScaleAspectFit;
-    contentView.image = self.image;
-    [self addSubview:contentView];
-    self.contentOffset = CGPointZero;
-    self.contentInset = UIEdgeInsetsZero;
-    self.contentSize = contentView.bounds.size;
-    [self setAspectRatio];
+    [self updateImageView];
 }
+
 @end

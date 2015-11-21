@@ -10,7 +10,7 @@
 #import "HMSettingsViewController.h"
 #import "HMScrollView.h"
 
-@interface HMCanvasViewController () <HMSettingsViewControllerDelegate>
+@interface HMCanvasViewController () <HMSettingsViewControllerDelegate, UIScrollViewDelegate>
 
 @property (strong, nonatomic) UIBarButtonItem *settingsBarButtonItem;
 @property (weak, nonatomic) IBOutlet HMScrollView *scrollView;
@@ -23,6 +23,8 @@ NSString * const kHMGridWidthKey = @"kHMGridWidthKey";
 NSString * const kHMGridHeightKey = @"kHMGridHeightKey";
 NSString * const kHMPaperWidthKey = @"kHMPaperWidthKey";
 NSString * const kHMPaperHeightKey = @"kHMPaperHeightKey";
+NSString * const kHMContentOffsetHorizontalKey = @"kHMContentOffsetHorizontalKey";
+NSString * const kHMContentOffsetVerticalKey = @"kHMContentOffsetVerticalKey";
 
 NSUInteger const kHMDefaultGridHeight = 1;
 NSUInteger const kHMDefaultGridWidth = 3;
@@ -31,6 +33,7 @@ CGFloat const kHMDefaultPaperHeight = 6.0;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.scrollView.delegate = self;
     [self loadFromUserDefaults];
     [self prepareBarButtonItems];
 }
@@ -143,6 +146,18 @@ CGFloat const kHMDefaultPaperHeight = 6.0;
 
 - (void)settingsButtonTapped:(id)sender {
     [self showSettings];
+}
+
+#pragma mark - UIScrollViewDelegate
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    CGFloat horizontalOffset = scrollView.contentOffset.x / scrollView.contentSize.width;
+    CGFloat verticalOffset = scrollView.contentOffset.y / scrollView.contentSize.height;
+    
+    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithFloat:horizontalOffset] forKey:kHMContentOffsetHorizontalKey];
+    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithFloat:verticalOffset] forKey:kHMContentOffsetVerticalKey];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 @end
