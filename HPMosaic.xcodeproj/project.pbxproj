@@ -157,7 +157,7 @@
 				TargetAttributes = {
 					655AFD021BFD92A6006E0C6E = {
 						CreatedOnToolsVersion = 7.1.1;
-						DevelopmentTeam = UJ5KAZ5V7V;
+						DevelopmentTeam = HA6CSLTGCW;
 					};
 				};
 			};
@@ -367,7 +367,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = HPMosaic/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.hp.dev.HPMosaic;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jbt.dev.HPMosaic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -380,7 +380,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = HPMosaic/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.hp.dev.HPMosaic;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jbt.dev.HPMosaic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
