@@ -9,8 +9,11 @@
 #import "HMCanvasViewController.h"
 #import "HMSettingsViewController.h"
 #import "HMScrollView.h"
+#import <MobilePrintSDK/MP.h>
+#import <MobilePrintSDK/MPPrintItemFactory.h>
+#import <MobilePrintSDK/MPLayoutFactory.h>
 
-@interface HMCanvasViewController () <HMSettingsViewControllerDelegate, UIScrollViewDelegate>
+@interface HMCanvasViewController () <HMSettingsViewControllerDelegate, UIScrollViewDelegate, MPPrintDelegate, MPPrintPaperDelegate>
 
 @property (strong, nonatomic) UIBarButtonItem *settingsBarButtonItem;
 @property (weak, nonatomic) IBOutlet HMScrollView *scrollView;
@@ -29,15 +32,15 @@ NSString * const kHMContentOffsetVerticalKey = @"kHMContentOffsetVerticalKey";
 
 NSUInteger const kHMDefaultGridHeight = 1;
 NSUInteger const kHMDefaultGridWidth = 3;
-CGFloat const kHMDefaultPaperWidth = 4.0;
-CGFloat const kHMDefaultPaperHeight = 6.0;
+MPPaperSize const kHMDefaultPaperSize = MPPaperSize4x6;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.scrollView.delegate = self;
+    [self configureMobilePrint];
     [self loadFromUserDefaults];
     [self prepareBarButtonItems];
     self.rotating = NO;
+    self.scrollView.delegate = self;
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -56,6 +59,15 @@ CGFloat const kHMDefaultPaperHeight = 6.0;
         [self.scrollView updateLayout];
         self.rotating = NO;
     }];
+}
+
+- (void)configureMobilePrint
+{
+    MPPaper *paper = [[MPPaper alloc] initWithPaperSize:kHMDefaultPaperSize paperType:MPPaperTypePhoto];
+    [MP sharedInstance].defaultPaper = paper;
+    [MP sharedInstance].supportedPapers = @[ paper ];
+    [MP sharedInstance].hidePaperSizeOption = YES;
+    [MP sharedInstance].hidePaperTypeOption = YES;
 }
 
 #pragma mark - HMSettingsViewControllerDelegate
@@ -87,7 +99,7 @@ CGFloat const kHMDefaultPaperHeight = 6.0;
     if (paperWidth && paperHeight) {
         self.scrollView.paperSize = CGSizeMake([paperWidth floatValue], [paperHeight floatValue]);
     } else {
-        self.scrollView.paperSize = CGSizeMake(kHMDefaultPaperWidth, kHMDefaultPaperHeight);
+        self.scrollView.paperSize = CGSizeMake([MP sharedInstance].defaultPaper.width, [MP sharedInstance].defaultPaper.height);
     }
     
     if (offsetX && offsetY) {
@@ -119,7 +131,14 @@ CGFloat const kHMDefaultPaperHeight = 6.0;
 
 - (void)showPrint
 {
-    // TO DO
+    MPPrintItem *printItem = [MPPrintItemFactory printItemWithAsset:[UIImage imageNamed:@"Sample Image"]];
+    MPLayoutOrientation orientation = MPLayoutOrientationPortrait;
+    if (self.scrollView.paperSize.width > self.scrollView.paperSize.height) {
+        orientation = MPLayoutOrientationLandscape;
+    }
+    printItem.layout = [MPLayoutFactory layoutWithType:[MPLayoutFill layoutType] orientation:orientation assetPosition:[MPLayout completeFillRectangle]];
+    UIViewController *vc = [[MP sharedInstance] printViewControllerWithDelegate:self dataSource:nil printItem:printItem fromQueue:NO settingsOnly:NO];
+    [self presentViewController:vc animated:YES completion:nil];
 }
 
 #pragma mark - Settings
@@ -174,6 +193,34 @@ CGFloat const kHMDefaultPaperHeight = 6.0;
         [self saveToUserDefaults];
         NSLog(@"OFFSET PERCENT:  %.3f, %.3f", sv.imageOffsetPercent.x, sv.imageOffsetPercent.y);
     }
+}
+
+#pragma mark - MPPrintDelegate
+
+- (void)didFinishPrintFlow:(UIViewController *)printViewController
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)didCancelPrintFlow:(UIViewController *)printViewController
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+# pragma mark - MPPrintPaperDelegate
+
+- (MPPaper *)defaultPaperForPrintSettings:(MPPrintSettings *)printSettings
+{
+    MPPaperSize size = MPPaperSize4x6;
+    if (5.0 == fminf(self.scrollView.paperSize.width, self.scrollView.paperSize.height)) {
+        size = MPPaperSize5x7;
+    }
+    return [[MPPaper alloc] initWithPaperSize:size paperType:MPPaperTypePhoto];;
+}
+
+- (NSArray *)supportedPapersForPrintSettings:(MPPrintSettings *)printSettings
+{
+    return @[ [self defaultPaperForPrintSettings:printSettings] ];
 }
 
 @end
