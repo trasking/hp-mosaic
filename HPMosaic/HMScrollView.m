@@ -25,7 +25,6 @@ CGFloat kHMGridOpacity = 0.9;
 
 - (void)drawRect:(CGRect)rect {
     [self drawGrid];
-    [self drawOverlay];
 }
 
 - (void)drawGrid
@@ -67,44 +66,6 @@ CGFloat kHMGridOpacity = 0.9;
     
     [self.gridView.layer addSublayer:gridLayer];
     self.gridLayer = gridLayer;
-}
-
-- (void)drawOverlay
-{
-    return;
-    
-    if (self.overlayLayer) {
-        [self.overlayLayer removeFromSuperlayer];
-    }
-    
-    CAShapeLayer *layer = [CAShapeLayer layer];
-    
-    UIBezierPath *path = [UIBezierPath bezierPath];
-    
-    [path moveToPoint:CGPointZero];
-    [path addLineToPoint:CGPointMake(self.bounds.size.width, 0)];
-    [path addLineToPoint:CGPointMake(0, self.bounds.size.height)];
-    [path closePath];
-    [path fill];
-    
-    layer.lineWidth = 10.0;
-    layer.path = path.CGPath;
-    layer.strokeColor = [[UIColor redColor] CGColor];
-    layer.opacity = 0.5;
-    
-    [self.layer addSublayer:layer];
-    self.overlayLayer = layer;
-    
-//    if (!self.overlayView) {
-//        self.overlayView = [[UIView alloc] initWithFrame:CGRectZero];
-//        self.overlayView.userInteractionEnabled = NO;
-//        self.overlayView.backgroundColor = [UIColor blackColor];
-//        self.overlayView.alpha = 0.5;
-//        [self.superview addSubview:self.overlayView];
-//    }
-//    
-//    CGRect scrollRect = CGRectMake(-self.contentOffset.x, -self.contentOffset.y, self.contentSize.width, self.contentSize.height);
-//    self.overlayView.frame = [self convertRect:scrollRect toView:self.superview];
 }
 
 - (void)setGridSize:(CGSize)gridSize

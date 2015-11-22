@@ -9,11 +9,13 @@
 #import "HMCanvasViewController.h"
 #import "HMSettingsViewController.h"
 #import "HMScrollView.h"
+#import "HMScrollContainerView.h"
 #import <MobilePrintSDK/MP.h>
 #import <MobilePrintSDK/MPPrintItemFactory.h>
 #import <MobilePrintSDK/MPLayoutFactory.h>
 
 @interface HMCanvasViewController () <HMSettingsViewControllerDelegate, UIScrollViewDelegate, MPPrintDelegate, MPPrintPaperDelegate>
+@property (weak, nonatomic) IBOutlet HMScrollContainerView *scrollViewContainer;
 
 @property (strong, nonatomic) UIBarButtonItem *settingsBarButtonItem;
 @property (weak, nonatomic) IBOutlet HMScrollView *scrollView;
@@ -54,11 +56,17 @@ MPPaperSize const kHMDefaultPaperSize = MPPaperSize4x6;
 {
     self.rotating = YES;
     [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
-        [self.scrollView updateLayout];
+        [self updateSubviews];
     } completion:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
-        [self.scrollView updateLayout];
+        [self updateSubviews];
         self.rotating = NO;
     }];
+}
+
+- (void)updateSubviews
+{
+    [self.scrollView updateLayout];
+    [self.scrollViewContainer setNeedsDisplay];
 }
 
 - (void)configureMobilePrint
@@ -77,6 +85,7 @@ MPPaperSize const kHMDefaultPaperSize = MPPaperSize4x6;
     self.scrollView.gridSize = settingsController.selectedGridSize;
     self.scrollView.paperSize = settingsController.selectedPaperSize;
     [self saveToUserDefaults];
+    [self updateSubviews];
 }
 
 #pragma mark - User Defaults

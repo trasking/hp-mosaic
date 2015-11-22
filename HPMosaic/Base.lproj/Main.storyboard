@@ -76,7 +76,7 @@
                                     <scrollView multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Bpl-eB-l4n" customClass="HMScrollView">
                                         <rect key="frame" x="20" y="20" width="560" height="496"/>
                                         <animations/>
-                                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                                        <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                     </scrollView>
                                 </subviews>
                                 <animations/>
@@ -107,6 +107,7 @@
                     <navigationItem key="navigationItem" id="nDl-jh-LTp"/>
                     <connections>
                         <outlet property="scrollView" destination="Bpl-eB-l4n" id="V8K-OA-5ZW"/>
+                        <outlet property="scrollViewContainer" destination="uEJ-hn-cRb" id="EcE-rv-1FZ"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="HRJ-Zr-wVY" userLabel="First Responder" sceneMemberID="firstResponder"/>
