@@ -14,7 +14,8 @@
 #import <MobilePrintSDK/MPPrintItemFactory.h>
 #import <MobilePrintSDK/MPLayoutFactory.h>
 
-@interface HMCanvasViewController () <HMSettingsViewControllerDelegate, UIScrollViewDelegate, MPPrintDelegate, MPPrintPaperDelegate>
+@interface HMCanvasViewController () <HMSettingsViewControllerDelegate, UIScrollViewDelegate, MPPrintDelegate, MPPrintPaperDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate>
+
 @property (weak, nonatomic) IBOutlet HMScrollContainerView *scrollViewContainer;
 
 @property (strong, nonatomic) UIBarButtonItem *settingsBarButtonItem;
@@ -140,7 +141,7 @@ MPPaperSize const kHMDefaultPaperSize = MPPaperSize4x6;
         [self chooseFromCameraRoll];
     }]];
     [alert addAction:[UIAlertAction actionWithTitle:@"Dropbox" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        [self chooseFromCameraRoll];
+        [self chooseFromDropbox];
     }]];
     [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
 
@@ -157,7 +158,18 @@ MPPaperSize const kHMDefaultPaperSize = MPPaperSize4x6;
 
 - (void)chooseFromCameraRoll
 {
-    NSLog(@"CAMERA ROLL");
+    UIImagePickerController *picker = [[UIImagePickerController alloc] init];
+    picker.delegate = self;
+    picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+    if ([self iPhone]) {
+        [self presentViewController:picker animated: YES completion:nil];
+    } else {
+        picker.modalPresentationStyle = UIModalPresentationPopover;
+        [self presentViewController:picker animated: YES completion:nil];
+        UIPopoverPresentationController *presentationController = [picker popoverPresentationController];
+        presentationController.permittedArrowDirections = UIPopoverArrowDirectionUp;
+        presentationController.barButtonItem = self.chooseBarButtonItem;
+    }
 }
 
 - (void)chooseFromDropbox
@@ -168,6 +180,18 @@ MPPaperSize const kHMDefaultPaperSize = MPPaperSize4x6;
 - (BOOL)iPhone
 {
     return UIUserInterfaceIdiomPhone == [[UIDevice currentDevice] userInterfaceIdiom];
+}
+
+#pragma mark - UIImagePickerControllerDelegate
+
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 #pragma mark - Print
