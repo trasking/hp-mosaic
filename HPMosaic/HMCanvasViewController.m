@@ -13,6 +13,7 @@
 #import <MobilePrintSDK/MP.h>
 #import <MobilePrintSDK/MPPrintItemFactory.h>
 #import <MobilePrintSDK/MPLayoutFactory.h>
+#import <Photos/Photos.h>
 
 @interface HMCanvasViewController () <HMSettingsViewControllerDelegate, UIScrollViewDelegate, MPPrintDelegate, MPPrintPaperDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate>
 
@@ -133,12 +134,12 @@ MPPaperSize const kHMDefaultPaperSize = MPPaperSize4x6;
 
 #pragma mark - Choose Photo
 
-- (void)showPhotoSelection
+- (void)showChoosePhoto
 {
 //    UIAlertControllerStyle style = phone ? UIAlertControllerStyleActionSheet : UIAlertControllerStyleAlert;
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Choose a Photo" message:@"Pick a photo source from one of the following options." preferredStyle:UIAlertControllerStyleActionSheet];
-    [alert addAction:[UIAlertAction actionWithTitle:@"Camera Roll" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        [self chooseFromCameraRoll];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Photo Library" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [self chooseFromPhotoLibrary];
     }]];
     [alert addAction:[UIAlertAction actionWithTitle:@"Dropbox" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [self chooseFromDropbox];
@@ -156,20 +157,9 @@ MPPaperSize const kHMDefaultPaperSize = MPPaperSize4x6;
     }
 }
 
-- (void)chooseFromCameraRoll
+- (void)chooseFromPhotoLibrary
 {
-    UIImagePickerController *picker = [[UIImagePickerController alloc] init];
-    picker.delegate = self;
-    picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-    if ([self iPhone]) {
-        [self presentViewController:picker animated: YES completion:nil];
-    } else {
-        picker.modalPresentationStyle = UIModalPresentationPopover;
-        [self presentViewController:picker animated: YES completion:nil];
-        UIPopoverPresentationController *presentationController = [picker popoverPresentationController];
-        presentationController.permittedArrowDirections = UIPopoverArrowDirectionUp;
-        presentationController.barButtonItem = self.chooseBarButtonItem;
-    }
+    [self verifyPhotoAccess];
 }
 
 - (void)chooseFromDropbox
@@ -182,6 +172,83 @@ MPPaperSize const kHMDefaultPaperSize = MPPaperSize4x6;
     return UIUserInterfaceIdiomPhone == [[UIDevice currentDevice] userInterfaceIdiom];
 }
 
+#pragma mark - Photo access
+
+
+- (void)verifyPhotoAccess
+{
+    PHAuthorizationStatus authorizationStatus = [PHPhotoLibrary authorizationStatus];
+    if (PHAuthorizationStatusAuthorized == authorizationStatus) {
+        [self showPhotoSelection];
+    } else if (PHAuthorizationStatusNotDetermined == authorizationStatus) {
+        [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
+            [self verifyPhotoAccess];
+        }];
+    } else if (PHAuthorizationStatusDenied == authorizationStatus) {
+        [self noAccessWithCaption:@"No Access" andMessage:@"Access to photos has been denied on this device."];
+    } else if (PHAuthorizationStatusRestricted == authorizationStatus) {
+        [self noAccessWithCaption:@"Restricted Access" andMessage:@"Access to photos is restricted by a policy on this device."];
+    }
+}
+
+- (void)noAccessWithCaption:(NSString *)caption andMessage:(NSString *)message
+{
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:caption
+                                                                   message:[NSString stringWithFormat:@"%@ The HP Mosaic app must be given access to your Photo Library before you can choose a photo from this device. Please check your settings.\n\nSettings → HP Mosaic → Photos", message]
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        [self showNoAccess];
+    }]];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Settings" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [self openSettings];
+    }]];
+    [self presentViewController:alert animated:YES completion:nil];
+    
+}
+
+- (void)openSettings
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSURL *url = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
+        [[UIApplication sharedApplication] openURL:url];
+    });
+}
+
+- (IBAction)authorizeButtonTapped:(id)sender {
+    [self openSettings];
+}
+
+- (void)showPhotoSelection
+{
+//    dispatch_async(dispatch_get_main_queue(), ^{
+        UIImagePickerController *picker = [[UIImagePickerController alloc] init];
+        picker.delegate = self;
+        picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+        if ([self iPhone]) {
+            [self presentViewController:picker animated: YES completion:nil];
+        } else {
+            picker.modalPresentationStyle = UIModalPresentationPopover;
+            [self presentViewController:picker animated: YES completion:nil];
+            UIPopoverPresentationController *presentationController = [picker popoverPresentationController];
+            presentationController.permittedArrowDirections = UIPopoverArrowDirectionUp;
+            presentationController.barButtonItem = self.chooseBarButtonItem;
+        }
+//    });
+}
+
+- (void)showNoPhotos
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        //
+    });
+}
+
+- (void)showNoAccess
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        //
+    });
+}
 #pragma mark - UIImagePickerControllerDelegate
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info
@@ -238,7 +305,7 @@ MPPaperSize const kHMDefaultPaperSize = MPPaperSize4x6;
 
 - (void)chooseButtonTapped:(id)sender
 {
-    [self showPhotoSelection];
+    [self showChoosePhoto];
 }
 
 - (void)printButtonTapped:(id)sender
