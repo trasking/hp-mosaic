@@ -36,7 +36,7 @@ NSUInteger const kHMPaperLandscapeSegmentIndex = 1;
     [super viewDidLoad];
     [self setupGrid];
     [self setupPaper];
-    [self refreshSettings];
+    [self refreshSettings:NO];
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
@@ -65,6 +65,9 @@ NSUInteger const kHMPaperLandscapeSegmentIndex = 1;
             [self addButtonRow:row column:column];
         }
     }
+    
+    UIPanGestureRecognizer *panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleGridPan:)];
+    [self.gridView addGestureRecognizer:panRecognizer];
 }
 
 - (void)setupPaper
@@ -140,26 +143,26 @@ NSUInteger const kHMPaperLandscapeSegmentIndex = 1;
     NSUInteger selectedRow = button.tag / kHMTotalColumns;
     NSUInteger selectedColumn = button.tag - (selectedRow * kHMTotalColumns);
     self.selectedGridSize = CGSizeMake(selectedColumn + 1, selectedRow + 1);
-    [self refreshSettings];
+    [self refreshSettings:YES];
 }
 
 - (IBAction)paperSegmentValueChanged:(id)sender {
     self.selectedPaperSize = [self paperSize];
-    [self refreshSettings];
+    [self refreshSettings:YES];
 }
 
 - (IBAction)orientationSegmentValueChanged:(id)sender {
     self.selectedPaperSize = [self paperSize];
-    [self refreshSettings];
+    [self refreshSettings:YES];
 }
 
 #pragma mark - Refresh
 
-- (void)refreshSettings
+- (void)refreshSettings:(BOOL)notify
 {
     [self refreshButtons];
     [self refreshSizeLabel];
-    if (self.delegate && [self.delegate respondsToSelector:@selector(settingsDidChange:)]) {
+    if (notify && self.delegate && [self.delegate respondsToSelector:@selector(settingsDidChange:)]) {
         [self.delegate settingsDidChange:self];
     }
 }
@@ -201,6 +204,25 @@ NSUInteger const kHMPaperLandscapeSegmentIndex = 1;
         height = 5.0;
     }
     return CGSizeMake(width, height);
+}
+
+#pragma mark - Gestures
+
+- (void)handleGridPan:(UIGestureRecognizer *)gestureRecognizer
+{
+    CGPoint location = [gestureRecognizer locationInView:self.gridView];
+    CGFloat rowHeight = self.gridView.bounds.size.height / kHMTotalRows;
+    CGFloat columnWidth = self.gridView.bounds.size.width / kHMTotalColumns;
+    NSUInteger row = location.y / rowHeight;
+    NSUInteger column = location.x / columnWidth;
+    
+    if (UIGestureRecognizerStateChanged == gestureRecognizer.state) {
+        self.selectedGridSize = CGSizeMake(column + 1, row + 1);
+        [self refreshSettings:NO];
+    } else if (UIGestureRecognizerStateEnded == gestureRecognizer.state) {
+        self.selectedGridSize = CGSizeMake(column + 1, row + 1);
+        [self refreshSettings:YES];
+    }
 }
 
 @end
