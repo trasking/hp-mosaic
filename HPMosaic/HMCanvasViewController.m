@@ -271,11 +271,21 @@ CGFloat const kHMDefaultImageOffsetPercentY = 0.5;
 
 - (void)loadImageFromDropbox:(NSURL *)url
 {
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Dropbox" message:@"Downloading photo from Dropbox..." preferredStyle:UIAlertControllerStyleAlert];
+
     dispatch_async(dispatch_get_main_queue(), ^{
+        [self presentViewController:alert animated:YES completion:nil];
+    });
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         self.scrollView.imageOffsetPercent = CGPointMake(kHMDefaultImageOffsetPercentX, kHMDefaultImageOffsetPercentY);
         self.photoURL = url;
         [self saveToUserDefaults];
-        self.scrollView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:url]];
+        UIImage *image = [UIImage imageWithData:[NSData dataWithContentsOfURL:url]];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.scrollView.image = image;
+            [self dismissViewControllerAnimated:alert completion:nil];
+        });
     });
 }
 
