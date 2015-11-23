@@ -21,7 +21,7 @@
 @implementation HMScrollView
 
 CGFloat kHMScrollViewGridStokeRatio = 0.01;
-CGFloat kHMGridOpacity = 0.9;
+CGFloat kHMGridOpacity = 0.5;
 
 - (void)drawRect:(CGRect)rect {
     [self drawGrid];
@@ -108,6 +108,7 @@ CGFloat kHMGridOpacity = 0.9;
 - (void)updateImageView
 {
     if (self.image) {
+        [self layoutIfNeeded];
         [self.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
         CGFloat xScale = self.bounds.size.width / self.image.size.width;
         CGFloat yScale = self.bounds.size.height / self.image.size.height;

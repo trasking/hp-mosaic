@@ -133,7 +133,7 @@ NSUInteger const kHMPaperLandscapeSegmentIndex = 1;
     widthConstraint.active = YES;
     heightConstraint.active = YES;
     
-    [button addTarget:self action:@selector(handleGridButtonTapped:) forControlEvents:UIControlEventTouchDragEnter + UIControlEventTouchDown];
+    [button addTarget:self action:@selector(handleGridButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
     button.included = NO;
 }
 
@@ -213,8 +213,8 @@ NSUInteger const kHMPaperLandscapeSegmentIndex = 1;
     CGPoint location = [gestureRecognizer locationInView:self.gridView];
     CGFloat rowHeight = self.gridView.bounds.size.height / kHMTotalRows;
     CGFloat columnWidth = self.gridView.bounds.size.width / kHMTotalColumns;
-    NSUInteger row = location.y / rowHeight;
-    NSUInteger column = location.x / columnWidth;
+    NSUInteger row = MAX(0, MIN(location.y / rowHeight, kHMTotalRows - 1));
+    NSUInteger column = MAX(0, MIN(location.x / columnWidth, kHMTotalRows - 1));
     
     if (UIGestureRecognizerStateChanged == gestureRecognizer.state) {
         self.selectedGridSize = CGSizeMake(column + 1, row + 1);

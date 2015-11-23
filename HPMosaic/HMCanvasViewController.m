@@ -22,7 +22,7 @@
 @property (strong, nonatomic) UIBarButtonItem *settingsBarButtonItem;
 @property (strong, nonatomic) UIBarButtonItem *chooseBarButtonItem;
 @property (weak, nonatomic) IBOutlet HMScrollView *scrollView;
-@property (assign, nonatomic) BOOL rotating;
+@property (strong, nonatomic) NSURL *photoURL;
 
 @end
 
@@ -32,37 +32,35 @@ NSString * const kHMGridWidthKey = @"kHMGridWidthKey";
 NSString * const kHMGridHeightKey = @"kHMGridHeightKey";
 NSString * const kHMPaperWidthKey = @"kHMPaperWidthKey";
 NSString * const kHMPaperHeightKey = @"kHMPaperHeightKey";
-NSString * const kHMContentOffsetHorizontalKey = @"kHMContentOffsetHorizontalKey";
-NSString * const kHMContentOffsetVerticalKey = @"kHMContentOffsetVerticalKey";
+NSString * const kHMImageOffsetPercentXKey = @"kHMImageOffsetPercentXKey";
+NSString * const kHMImageOffsetPercentYKey = @"kHMImageOffsetPercentYKey";
+NSString * const kHMPhotoURLKey = @"kHMPhotoURLKey";
 
 NSUInteger const kHMDefaultGridHeight = 1;
 NSUInteger const kHMDefaultGridWidth = 3;
 MPPaperSize const kHMDefaultPaperSize = MPPaperSize4x6;
+CGFloat const kHMDefaultImageOffsetPercentX = 0.5;
+CGFloat const kHMDefaultImageOffsetPercentY = 0.5;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self configureMobilePrint];
     [self loadFromUserDefaults];
     [self prepareBarButtonItems];
-    self.rotating = NO;
     self.scrollView.delegate = self;
 }
 
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    
-    self.scrollView.image = [UIImage imageNamed:@"Sample Image"];
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
-    self.rotating = YES;
     [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
         [self updateSubviews];
     } completion:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
         [self updateSubviews];
-        self.rotating = NO;
     }];
 }
 
@@ -81,16 +79,6 @@ MPPaperSize const kHMDefaultPaperSize = MPPaperSize4x6;
     [MP sharedInstance].hidePaperTypeOption = YES;
 }
 
-#pragma mark - HMSettingsViewControllerDelegate
-
-- (void)settingsDidChange:(HMSettingsViewController *)settingsController
-{
-    self.scrollView.gridSize = settingsController.selectedGridSize;
-    self.scrollView.paperSize = settingsController.selectedPaperSize;
-    [self saveToUserDefaults];
-    [self updateSubviews];
-}
-
 #pragma mark - User Defaults
 
 - (void)loadFromUserDefaults
@@ -99,8 +87,9 @@ MPPaperSize const kHMDefaultPaperSize = MPPaperSize4x6;
     NSNumber *gridHeight = [[NSUserDefaults standardUserDefaults] objectForKey:kHMGridHeightKey];
     NSNumber *paperWidth = [[NSUserDefaults standardUserDefaults] objectForKey:kHMPaperWidthKey];
     NSNumber *paperHeight = [[NSUserDefaults standardUserDefaults] objectForKey:kHMPaperHeightKey];
-    NSNumber *offsetX = [[NSUserDefaults standardUserDefaults] objectForKey:kHMContentOffsetHorizontalKey];
-    NSNumber *offsetY = [[NSUserDefaults standardUserDefaults] objectForKey:kHMContentOffsetVerticalKey];
+    NSNumber *offsetX = [[NSUserDefaults standardUserDefaults] objectForKey:kHMImageOffsetPercentXKey];
+    NSNumber *offsetY = [[NSUserDefaults standardUserDefaults] objectForKey:kHMImageOffsetPercentYKey];
+    NSURL *photoURL = [NSURL URLWithString:[[NSUserDefaults standardUserDefaults] objectForKey:kHMPhotoURLKey]];
     
     if (gridWidth && gridHeight) {
         self.scrollView.gridSize = CGSizeMake([gridWidth floatValue], [gridHeight floatValue]);
@@ -117,7 +106,25 @@ MPPaperSize const kHMDefaultPaperSize = MPPaperSize4x6;
     if (offsetX && offsetY) {
         self.scrollView.imageOffsetPercent = CGPointMake([offsetX floatValue], [offsetY floatValue]);
     } else {
-        self.scrollView.imageOffsetPercent = CGPointZero;
+        self.scrollView.imageOffsetPercent = CGPointMake(kHMDefaultImageOffsetPercentX, kHMDefaultImageOffsetPercentY);
+    }
+    
+    self.photoURL = photoURL;
+    PHFetchResult<PHAsset *> *result = photoURL ? [PHAsset fetchAssetsWithALAssetURLs:@[ photoURL] options:nil] : nil;
+    if (result && result.count > 0) {
+        [result enumerateObjectsUsingBlock:^(PHAsset * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            PHImageRequestOptions *options = [[PHImageRequestOptions alloc] init];
+            options.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+            options.resizeMode = PHImageRequestOptionsResizeModeFast;
+            options.synchronous = NO;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[PHImageManager defaultManager] requestImageForAsset:obj targetSize:PHImageManagerMaximumSize contentMode:PHImageContentModeAspectFit options:options resultHandler:^(UIImage * _Nullable result, NSDictionary * _Nullable info) {
+                    self.scrollView.image = result;
+                }];
+            });
+        }];
+    } else {
+        self.scrollView.image = [UIImage imageNamed:@"Sample Image"];
     }
 }
 
@@ -127,8 +134,9 @@ MPPaperSize const kHMDefaultPaperSize = MPPaperSize4x6;
     [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithFloat:self.scrollView.gridSize.height] forKey:kHMGridHeightKey];
     [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithFloat:self.scrollView.paperSize.width] forKey:kHMPaperWidthKey];
     [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithFloat:self.scrollView.paperSize.height] forKey:kHMPaperHeightKey];
-    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithFloat:self.scrollView.imageOffsetPercent.x] forKey:kHMContentOffsetHorizontalKey];
-    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithFloat:self.scrollView.imageOffsetPercent.y] forKey:kHMContentOffsetVerticalKey];
+    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithFloat:self.scrollView.imageOffsetPercent.x] forKey:kHMImageOffsetPercentXKey];
+    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithFloat:self.scrollView.imageOffsetPercent.y] forKey:kHMImageOffsetPercentYKey];
+    [[NSUserDefaults standardUserDefaults] setObject:self.photoURL.absoluteString forKey:kHMPhotoURLKey];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
@@ -136,7 +144,7 @@ MPPaperSize const kHMDefaultPaperSize = MPPaperSize4x6;
 
 - (void)showChoosePhoto
 {
-//    UIAlertControllerStyle style = phone ? UIAlertControllerStyleActionSheet : UIAlertControllerStyleAlert;
+    //    UIAlertControllerStyle style = phone ? UIAlertControllerStyleActionSheet : UIAlertControllerStyleAlert;
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Choose a Photo" message:@"Pick a photo source from one of the following options." preferredStyle:UIAlertControllerStyleActionSheet];
     [alert addAction:[UIAlertAction actionWithTitle:@"Photo Library" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [self chooseFromPhotoLibrary];
@@ -145,8 +153,8 @@ MPPaperSize const kHMDefaultPaperSize = MPPaperSize4x6;
         [self chooseFromDropbox];
     }]];
     [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
-
-   if ([self iPhone]) {
+    
+    if ([self iPhone]) {
         [self presentViewController:alert animated: YES completion:nil];
     } else {
         alert.modalPresentationStyle = UIModalPresentationPopover;
@@ -196,9 +204,7 @@ MPPaperSize const kHMDefaultPaperSize = MPPaperSize4x6;
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:caption
                                                                    message:[NSString stringWithFormat:@"%@ The HP Mosaic app must be given access to your Photo Library before you can choose a photo from this device. Please check your settings.\n\nSettings → HP Mosaic → Photos", message]
                                                             preferredStyle:UIAlertControllerStyleAlert];
-    [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-        [self showNoAccess];
-    }]];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
     [alert addAction:[UIAlertAction actionWithTitle:@"Settings" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [self openSettings];
     }]];
@@ -220,40 +226,30 @@ MPPaperSize const kHMDefaultPaperSize = MPPaperSize4x6;
 
 - (void)showPhotoSelection
 {
-//    dispatch_async(dispatch_get_main_queue(), ^{
-        UIImagePickerController *picker = [[UIImagePickerController alloc] init];
-        picker.delegate = self;
-        picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-        if ([self iPhone]) {
-            [self presentViewController:picker animated: YES completion:nil];
-        } else {
-            picker.modalPresentationStyle = UIModalPresentationPopover;
-            [self presentViewController:picker animated: YES completion:nil];
-            UIPopoverPresentationController *presentationController = [picker popoverPresentationController];
-            presentationController.permittedArrowDirections = UIPopoverArrowDirectionUp;
-            presentationController.barButtonItem = self.chooseBarButtonItem;
-        }
-//    });
+    UIImagePickerController *picker = [[UIImagePickerController alloc] init];
+    picker.delegate = self;
+    picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+    if ([self iPhone]) {
+        [self presentViewController:picker animated: YES completion:nil];
+    } else {
+        picker.modalPresentationStyle = UIModalPresentationPopover;
+        [self presentViewController:picker animated: YES completion:nil];
+        UIPopoverPresentationController *presentationController = [picker popoverPresentationController];
+        presentationController.permittedArrowDirections = UIPopoverArrowDirectionUp;
+        presentationController.barButtonItem = self.chooseBarButtonItem;
+    }
 }
 
-- (void)showNoPhotos
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        //
-    });
-}
-
-- (void)showNoAccess
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        //
-    });
-}
 #pragma mark - UIImagePickerControllerDelegate
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info
 {
     [self dismissViewControllerAnimated:YES completion:nil];
+    self.scrollView.imageOffsetPercent = CGPointMake(kHMDefaultImageOffsetPercentX, kHMDefaultImageOffsetPercentY);
+    self.photoURL = [info objectForKey:UIImagePickerControllerReferenceURL];
+    self.scrollView.image = [info objectForKey:UIImagePickerControllerOriginalImage];
+    [self saveToUserDefaults];
+//    [self.scrollView updateLayout];
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
@@ -291,6 +287,17 @@ MPPaperSize const kHMDefaultPaperSize = MPPaperSize4x6;
     presentationController.barButtonItem = self.settingsBarButtonItem;
 }
 
+
+#pragma mark - HMSettingsViewControllerDelegate
+
+- (void)settingsDidChange:(HMSettingsViewController *)settingsController
+{
+    self.scrollView.gridSize = settingsController.selectedGridSize;
+    self.scrollView.paperSize = settingsController.selectedPaperSize;
+    [self saveToUserDefaults];
+    [self updateSubviews];
+}
+
 #pragma mark - Bar Button Items
 
 - (void)prepareBarButtonItems
@@ -319,13 +326,20 @@ MPPaperSize const kHMDefaultPaperSize = MPPaperSize4x6;
 
 #pragma mark - UIScrollViewDelegate
 
-- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
 {
-    if (!self.rotating) {
+    if (!decelerate) {
         HMScrollView *sv = (HMScrollView *)scrollView;
         [sv captureImageLocation];
         [self saveToUserDefaults];
     }
+}
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
+{
+    HMScrollView *sv = (HMScrollView *)scrollView;
+    [sv captureImageLocation];
+    [self saveToUserDefaults];
 }
 
 #pragma mark - MPPrintDelegate
