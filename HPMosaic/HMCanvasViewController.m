@@ -14,6 +14,7 @@
 #import <MobilePrintSDK/MPPrintItemFactory.h>
 #import <MobilePrintSDK/MPLayoutFactory.h>
 #import <Photos/Photos.h>
+#import <DBChooser/DBChooser.h>
 
 @interface HMCanvasViewController () <HMSettingsViewControllerDelegate, UIScrollViewDelegate, MPPrintDelegate, MPPrintPaperDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate>
 
@@ -172,7 +173,7 @@ CGFloat const kHMDefaultImageOffsetPercentY = 0.5;
 
 - (void)chooseFromDropbox
 {
-    NSLog(@"DROPBOX");
+    [self showDropboxSelection];
 }
 
 - (BOOL)iPhone
@@ -247,14 +248,35 @@ CGFloat const kHMDefaultImageOffsetPercentY = 0.5;
     [self dismissViewControllerAnimated:YES completion:nil];
     self.scrollView.imageOffsetPercent = CGPointMake(kHMDefaultImageOffsetPercentX, kHMDefaultImageOffsetPercentY);
     self.photoURL = [info objectForKey:UIImagePickerControllerReferenceURL];
-    self.scrollView.image = [info objectForKey:UIImagePickerControllerOriginalImage];
     [self saveToUserDefaults];
-//    [self.scrollView updateLayout];
+    self.scrollView.image = [info objectForKey:UIImagePickerControllerOriginalImage];
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
 {
     [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+#pragma mark - Dropbox
+
+- (void)showDropboxSelection
+{
+    [[DBChooser defaultChooser] openChooserForLinkType:DBChooserLinkTypeDirect fromViewController:self completion:^(NSArray *results) {
+        if (results.count > 0) {
+            DBChooserResult *result = [results firstObject];
+            [self loadImageFromDropbox:result.link];
+        }
+    }];
+}
+
+- (void)loadImageFromDropbox:(NSURL *)url
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.scrollView.imageOffsetPercent = CGPointMake(kHMDefaultImageOffsetPercentX, kHMDefaultImageOffsetPercentY);
+        self.photoURL = url;
+        [self saveToUserDefaults];
+        self.scrollView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:url]];
+    });
 }
 
 #pragma mark - Print

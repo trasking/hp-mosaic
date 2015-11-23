@@ -7,6 +7,7 @@
 //
 
 #import "AppDelegate.h"
+#import <DBChooser/DBChooser.h>
 
 @interface AppDelegate ()
 
@@ -40,6 +41,15 @@
 
 - (void)applicationWillTerminate:(UIApplication *)application {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+}
+
+- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url
+  sourceApplication:(NSString *)source annotation:(id)annotation
+{
+    if ([[DBChooser defaultChooser] handleOpenURL:url]) {
+        return YES;
+    }
+    return NO;
 }
 
 @end
