@@ -18,6 +18,7 @@
 @property (weak, nonatomic) IBOutlet HMScrollContainerView *scrollViewContainer;
 
 @property (strong, nonatomic) UIBarButtonItem *settingsBarButtonItem;
+@property (strong, nonatomic) UIBarButtonItem *chooseBarButtonItem;
 @property (weak, nonatomic) IBOutlet HMScrollView *scrollView;
 @property (assign, nonatomic) BOOL rotating;
 
@@ -133,7 +134,40 @@ MPPaperSize const kHMDefaultPaperSize = MPPaperSize4x6;
 
 - (void)showPhotoSelection
 {
-    // TO DO
+//    UIAlertControllerStyle style = phone ? UIAlertControllerStyleActionSheet : UIAlertControllerStyleAlert;
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Choose a Photo" message:@"Pick a photo source from one of the following options." preferredStyle:UIAlertControllerStyleActionSheet];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Camera Roll" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [self chooseFromCameraRoll];
+    }]];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Dropbox" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [self chooseFromCameraRoll];
+    }]];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
+
+   if ([self iPhone]) {
+        [self presentViewController:alert animated: YES completion:nil];
+    } else {
+        alert.modalPresentationStyle = UIModalPresentationPopover;
+        [self presentViewController:alert animated: YES completion:nil];
+        UIPopoverPresentationController *presentationController = [alert popoverPresentationController];
+        presentationController.permittedArrowDirections = UIPopoverArrowDirectionUp;
+        presentationController.barButtonItem = self.chooseBarButtonItem;
+    }
+}
+
+- (void)chooseFromCameraRoll
+{
+    NSLog(@"CAMERA ROLL");
+}
+
+- (void)chooseFromDropbox
+{
+    NSLog(@"DROPBOX");
+}
+
+- (BOOL)iPhone
+{
+    return UIUserInterfaceIdiomPhone == [[UIDevice currentDevice] userInterfaceIdiom];
 }
 
 #pragma mark - Print
@@ -173,9 +207,9 @@ MPPaperSize const kHMDefaultPaperSize = MPPaperSize4x6;
     self.settingsBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Settings" style:UIBarButtonItemStylePlain target:self action:@selector(settingsButtonTapped:)];
     self.navigationItem.leftBarButtonItem = self.settingsBarButtonItem;
     
-    UIBarButtonItem *chooseButton = [[UIBarButtonItem alloc] initWithTitle:@"Choose" style:UIBarButtonItemStylePlain target:self action:@selector(chooseButtonTapped:)];
+    self.chooseBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Choose" style:UIBarButtonItemStylePlain target:self action:@selector(chooseButtonTapped:)];
     UIBarButtonItem *printButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"Print Icon"] style:UIBarButtonItemStylePlain target:self action:@selector(printButtonTapped:)];
-    self.navigationItem.rightBarButtonItems = @[ chooseButton, printButton ];
+    self.navigationItem.rightBarButtonItems = @[ self.chooseBarButtonItem, printButton ];
 }
 
 - (void)chooseButtonTapped:(id)sender
@@ -200,7 +234,6 @@ MPPaperSize const kHMDefaultPaperSize = MPPaperSize4x6;
         HMScrollView *sv = (HMScrollView *)scrollView;
         [sv captureImageLocation];
         [self saveToUserDefaults];
-        NSLog(@"OFFSET PERCENT:  %.3f, %.3f", sv.imageOffsetPercent.x, sv.imageOffsetPercent.y);
     }
 }
 
