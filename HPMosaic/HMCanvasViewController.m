@@ -317,7 +317,7 @@ CGFloat const kHMDefaultImageOffsetPercentY = 0.5;
             completion(image);
         }
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self dismissViewControllerAnimated:alert completion:nil];
+            [self dismissViewControllerAnimated:YES completion:nil];
         });
     });
 }
