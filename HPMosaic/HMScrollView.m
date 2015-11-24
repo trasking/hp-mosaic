@@ -123,7 +123,10 @@ CGFloat kHMGridOpacity = 0.5;
         
         CGPoint contentCenter = CGPointMake(contentView.bounds.size.width * self.imageOffsetPercent.x, contentView.bounds.size.height * self.imageOffsetPercent.y);
         CGPoint scrollViewCenter = CGPointMake(self.bounds.size.width / 2.0, self.bounds.size.height / 2.0);
-        CGPoint offset = CGPointMake(fmaxf(contentCenter.x - scrollViewCenter.x, 0.0), fmaxf(contentCenter.y - scrollViewCenter.y, 0.0));
+        
+        CGFloat offsetX = fminf(fmaxf(contentCenter.x - scrollViewCenter.x, 0.0), contentView.bounds.size.width - self.bounds.size.width);
+        CGFloat offsetY = fminf(fmaxf(contentCenter.y - scrollViewCenter.y, 0.0), contentView.bounds.size.height - self.bounds.size.height);
+        CGPoint offset = CGPointMake(offsetX, offsetY);
         
         self.contentOffset = offset;
         self.contentInset = UIEdgeInsetsZero;
