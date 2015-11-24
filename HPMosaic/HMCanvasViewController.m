@@ -111,22 +111,11 @@ CGFloat const kHMDefaultImageOffsetPercentY = 0.5;
     }
     
     self.photoURL = photoURL;
-    PHFetchResult<PHAsset *> *result = photoURL ? [PHAsset fetchAssetsWithALAssetURLs:@[ photoURL] options:nil] : nil;
-    if (result && result.count > 0) {
-        [result enumerateObjectsUsingBlock:^(PHAsset * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            PHImageRequestOptions *options = [[PHImageRequestOptions alloc] init];
-            options.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
-            options.resizeMode = PHImageRequestOptionsResizeModeFast;
-            options.synchronous = NO;
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [[PHImageManager defaultManager] requestImageForAsset:obj targetSize:PHImageManagerMaximumSize contentMode:PHImageContentModeAspectFit options:options resultHandler:^(UIImage * _Nullable result, NSDictionary * _Nullable info) {
-                    self.scrollView.image = result;
-                }];
-            });
-        }];
-    } else {
-        self.scrollView.image = [UIImage imageNamed:@"Sample Image"];
-    }
+    [self retrievePhoto:photoURL completion:^(UIImage *image) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.scrollView.image = image ? image : [UIImage imageNamed:@"Sample Image"];
+        });
+    }];
 }
 
 - (void)saveToUserDefaults
@@ -141,6 +130,31 @@ CGFloat const kHMDefaultImageOffsetPercentY = 0.5;
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
+- (void)retrievePhoto:(NSURL *)url completion:(void(^)(UIImage *image))completion
+{
+    if (nil == url) {
+        if (completion) {
+            completion(nil);
+        }
+    } else if ([url.absoluteString containsString:@"dropbox"]) {
+        [self retrieveDropboxPhoto:url completion:^(UIImage *image) {
+            if (completion) {
+                completion(image);
+            }
+        }];
+    } else if([url.scheme isEqualToString:@"assets-library"]) {
+        [self retrieveLibraryPhoto:url completion:^(UIImage *image) {
+            if (completion) {
+                completion(image);
+            }
+        }];
+    } else {
+        if (completion) {
+            completion(nil);
+        }
+    }
+}
+
 #pragma mark - Choose Photo
 
 - (void)showChoosePhoto
@@ -148,14 +162,14 @@ CGFloat const kHMDefaultImageOffsetPercentY = 0.5;
     //    UIAlertControllerStyle style = phone ? UIAlertControllerStyleActionSheet : UIAlertControllerStyleAlert;
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Choose a Photo" message:@"Pick a photo source from one of the following options." preferredStyle:UIAlertControllerStyleActionSheet];
     [alert addAction:[UIAlertAction actionWithTitle:@"Photo Library" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        [self chooseFromPhotoLibrary];
+        [self verifyPhotoAccess];
     }]];
     [alert addAction:[UIAlertAction actionWithTitle:@"Dropbox" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        [self chooseFromDropbox];
+        [self showDropboxSelection];
     }]];
     [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
     
-    if ([self iPhone]) {
+    if (IS_IPHONE) {
         [self presentViewController:alert animated: YES completion:nil];
     } else {
         alert.modalPresentationStyle = UIModalPresentationPopover;
@@ -164,21 +178,6 @@ CGFloat const kHMDefaultImageOffsetPercentY = 0.5;
         presentationController.permittedArrowDirections = UIPopoverArrowDirectionUp;
         presentationController.barButtonItem = self.chooseBarButtonItem;
     }
-}
-
-- (void)chooseFromPhotoLibrary
-{
-    [self verifyPhotoAccess];
-}
-
-- (void)chooseFromDropbox
-{
-    [self showDropboxSelection];
-}
-
-- (BOOL)iPhone
-{
-    return UIUserInterfaceIdiomPhone == [[UIDevice currentDevice] userInterfaceIdiom];
 }
 
 #pragma mark - Photo access
@@ -225,22 +224,6 @@ CGFloat const kHMDefaultImageOffsetPercentY = 0.5;
     [self openSettings];
 }
 
-- (void)showPhotoSelection
-{
-    UIImagePickerController *picker = [[UIImagePickerController alloc] init];
-    picker.delegate = self;
-    picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-    if ([self iPhone]) {
-        [self presentViewController:picker animated: YES completion:nil];
-    } else {
-        picker.modalPresentationStyle = UIModalPresentationPopover;
-        [self presentViewController:picker animated: YES completion:nil];
-        UIPopoverPresentationController *presentationController = [picker popoverPresentationController];
-        presentationController.permittedArrowDirections = UIPopoverArrowDirectionUp;
-        presentationController.barButtonItem = self.chooseBarButtonItem;
-    }
-}
-
 #pragma mark - UIImagePickerControllerDelegate
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info
@@ -257,6 +240,48 @@ CGFloat const kHMDefaultImageOffsetPercentY = 0.5;
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
+#pragma mark - Photo Library
+
+- (void)showPhotoSelection
+{
+    UIImagePickerController *picker = [[UIImagePickerController alloc] init];
+    picker.delegate = self;
+    picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+    if (IS_IPHONE) {
+        [self presentViewController:picker animated: YES completion:nil];
+    } else {
+        picker.modalPresentationStyle = UIModalPresentationPopover;
+        [self presentViewController:picker animated: YES completion:nil];
+        UIPopoverPresentationController *presentationController = [picker popoverPresentationController];
+        presentationController.permittedArrowDirections = UIPopoverArrowDirectionUp;
+        presentationController.barButtonItem = self.chooseBarButtonItem;
+    }
+}
+
+- (void)retrieveLibraryPhoto:(NSURL *)url completion:(void(^)(UIImage *image))completion
+{
+    PHFetchResult<PHAsset *> *result = [PHAsset fetchAssetsWithALAssetURLs:@[ url ] options:nil];
+    if (result.count > 0) {
+        [result enumerateObjectsUsingBlock:^(PHAsset * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            PHImageRequestOptions *options = [[PHImageRequestOptions alloc] init];
+            options.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+            options.resizeMode = PHImageRequestOptionsResizeModeFast;
+            options.synchronous = NO;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[PHImageManager defaultManager] requestImageForAsset:obj targetSize:PHImageManagerMaximumSize contentMode:PHImageContentModeAspectFit options:options resultHandler:^(UIImage * _Nullable result, NSDictionary * _Nullable info) {
+                    if (completion) {
+                        completion(result);
+                    }
+                }];
+            });
+        }];
+    } else {
+        if (completion) {
+            completion(nil);
+        }
+    }
+}
+
 #pragma mark - Dropbox
 
 - (void)showDropboxSelection
@@ -264,26 +289,32 @@ CGFloat const kHMDefaultImageOffsetPercentY = 0.5;
     [[DBChooser defaultChooser] openChooserForLinkType:DBChooserLinkTypeDirect fromViewController:self completion:^(NSArray *results) {
         if (results.count > 0) {
             DBChooserResult *result = [results firstObject];
-            [self loadImageFromDropbox:result.link];
+            self.scrollView.imageOffsetPercent = CGPointMake(kHMDefaultImageOffsetPercentX, kHMDefaultImageOffsetPercentY);
+            [self retrieveDropboxPhoto:result.link completion:^(UIImage *image) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    self.scrollView.image = image;
+                });
+            }];
         }
     }];
 }
 
-- (void)loadImageFromDropbox:(NSURL *)url
+- (void)retrieveDropboxPhoto:(NSURL *)url completion:(void(^)(UIImage *image))completion
 {
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Dropbox" message:@"Downloading photo from Dropbox..." preferredStyle:UIAlertControllerStyleAlert];
-
+    
     dispatch_async(dispatch_get_main_queue(), ^{
         [self presentViewController:alert animated:YES completion:nil];
     });
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        self.scrollView.imageOffsetPercent = CGPointMake(kHMDefaultImageOffsetPercentX, kHMDefaultImageOffsetPercentY);
         self.photoURL = url;
         [self saveToUserDefaults];
         UIImage *image = [UIImage imageWithData:[NSData dataWithContentsOfURL:url]];
+        if (completion) {
+            completion(image);
+        }
         dispatch_async(dispatch_get_main_queue(), ^{
-            self.scrollView.image = image;
             [self dismissViewControllerAnimated:alert completion:nil];
         });
     });

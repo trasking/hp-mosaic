@@ -108,6 +108,7 @@ CGFloat kHMGridOpacity = 0.5;
 - (void)updateImageView
 {
     if (self.image) {
+        self.hidden = NO;
         [self layoutIfNeeded];
         [self.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
         CGFloat xScale = self.bounds.size.width / self.image.size.width;
