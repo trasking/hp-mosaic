@@ -329,6 +329,7 @@ CGFloat const kHMDefaultImageOffsetPercentY = 0.5;
     UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]];
     HMSettingsViewController *vc = (HMSettingsViewController *)[storyboard instantiateViewControllerWithIdentifier:@"HMSettingsViewController"];
     vc.delegate = self;
+    vc.image = self.scrollView.image;
     vc.selectedGridSize = self.scrollView.gridSize;
     vc.selectedPaperSize = self.scrollView.paperSize;
     vc.modalPresentationStyle = UIModalPresentationPopover;

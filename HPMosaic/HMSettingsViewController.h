@@ -15,6 +15,7 @@
 @property (assign, nonatomic) CGSize selectedGridSize;
 @property (assign, nonatomic) CGSize selectedPaperSize;
 @property (weak, nonatomic) id<HMSettingsViewControllerDelegate>delegate;
+@property (strong, nonatomic) UIImage *image;
 
 @end
 

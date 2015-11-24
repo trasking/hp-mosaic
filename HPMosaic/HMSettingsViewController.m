@@ -21,8 +21,8 @@
 
 @implementation HMSettingsViewController
 
-NSUInteger const kHMTotalRows = 5;
-NSUInteger const kHMTotalColumns = 5;
+NSUInteger const kHMTotalRows = 8;
+NSUInteger const kHMTotalColumns = 8;
 
 NSUInteger const kHMPaper4x6SegmentIndex = 0;
 NSUInteger const kHMPaper5x7SegmentIndex = 1;
@@ -183,7 +183,8 @@ NSUInteger const kHMPaperLandscapeSegmentIndex = 1;
     NSString *columnLabel = [NSString stringWithFormat:@"%.0f column%@", self.selectedGridSize.width, self.selectedGridSize.width > 1 ? @"s" : @""];
     CGFloat width = self.selectedPaperSize.width * self.selectedGridSize.width;
     CGFloat height = self.selectedPaperSize.height * self.selectedGridSize.height;
-    self.sizeLabel.text = [NSString stringWithFormat:@"%@ x %@ (%.0f\" x %.0f\")", columnLabel, rowLabel, width, height];
+    CGFloat dpi = fminf(self.image.size.width / width, self.image.size.height / height);
+    self.sizeLabel.text = [NSString stringWithFormat:@"%@ x %@ — %.0f″ x %.0f″ — %.0f DPI", columnLabel, rowLabel, width, height, dpi];
 }
 
 - (CGSize)paperSize
