@@ -16,7 +16,7 @@
 #import <Photos/Photos.h>
 #import <DBChooser/DBChooser.h>
 
-@interface HMCanvasViewController () <HMSettingsViewControllerDelegate, UIScrollViewDelegate, MPPrintDelegate, MPPrintPaperDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate>
+@interface HMCanvasViewController () <HMSettingsViewControllerDelegate, UIScrollViewDelegate, MPPrintDelegate, MPPrintPaperDelegate, MPPrintDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate>
 
 @property (weak, nonatomic) IBOutlet HMScrollContainerView *scrollViewContainer;
 
@@ -24,6 +24,7 @@
 @property (strong, nonatomic) UIBarButtonItem *chooseBarButtonItem;
 @property (weak, nonatomic) IBOutlet HMScrollView *scrollView;
 @property (strong, nonatomic) NSURL *photoURL;
+@property (strong, nonatomic) NSArray<MPPrintItem *> *printItems;
 
 @end
 
@@ -78,6 +79,7 @@ CGFloat const kHMDefaultImageOffsetPercentY = 0.5;
     [MP sharedInstance].supportedPapers = @[ paper ];
     [MP sharedInstance].hidePaperSizeOption = YES;
     [MP sharedInstance].hidePaperTypeOption = YES;
+    [MP sharedInstance].printPaperDelegate = self;
 }
 
 #pragma mark - User Defaults
@@ -320,21 +322,7 @@ CGFloat const kHMDefaultImageOffsetPercentY = 0.5;
     });
 }
 
-#pragma mark - Print
-
-- (void)showPrint
-{
-    MPPrintItem *printItem = [MPPrintItemFactory printItemWithAsset:[UIImage imageNamed:@"Sample Image"]];
-    MPLayoutOrientation orientation = MPLayoutOrientationPortrait;
-    if (self.scrollView.paperSize.width > self.scrollView.paperSize.height) {
-        orientation = MPLayoutOrientationLandscape;
-    }
-    printItem.layout = [MPLayoutFactory layoutWithType:[MPLayoutFill layoutType] orientation:orientation assetPosition:[MPLayout completeFillRectangle]];
-    UIViewController *vc = [[MP sharedInstance] printViewControllerWithDelegate:self dataSource:nil printItem:printItem fromQueue:NO settingsOnly:NO];
-    [self presentViewController:vc animated:YES completion:nil];
-}
-
-#pragma mark - Settings
+#pragma mark - Settings Popover
 
 - (void)showSettings
 {
@@ -405,6 +393,37 @@ CGFloat const kHMDefaultImageOffsetPercentY = 0.5;
     [self saveToUserDefaults];
 }
 
+#pragma mark - Print
+
+- (void)showPrint
+{
+    MPLayoutOrientation orientation = MPLayoutOrientationPortrait;
+    if (self.scrollView.paperSize.width > self.scrollView.paperSize.height) {
+        orientation = MPLayoutOrientationLandscape;
+    }
+    MPLayout *layout = [MPLayoutFactory layoutWithType:[MPLayoutFill layoutType] orientation:orientation assetPosition:[MPLayout completeFillRectangle]];
+    
+    NSMutableArray *printItems = [NSMutableArray array];
+    for (UIImage *image in [self printableImages]) {
+        MPPrintItem *printItem = [MPPrintItemFactory printItemWithAsset:image];
+        printItem.layout = layout;
+        [printItems addObject:printItem];
+    }
+    self.printItems = printItems;
+    
+    UIViewController *vc = [[MP sharedInstance] printViewControllerWithDelegate:self dataSource:self printItem:[self.printItems firstObject] fromQueue:NO settingsOnly:NO];
+    [self presentViewController:vc animated:YES completion:nil];
+}
+
+- (MPPaper *)paperFromSettings
+{
+    MPPaperSize size = MPPaperSize4x6;
+    if (5 == (int)fminf(self.scrollView.paperSize.width, self.scrollView.paperSize.height)) {
+        size = MPPaperSize5x7;
+    }
+    return [[MPPaper alloc] initWithPaperSize:size paperType:MPPaperTypePhoto];
+}
+
 #pragma mark - MPPrintDelegate
 
 - (void)didFinishPrintFlow:(UIViewController *)printViewController
@@ -417,20 +436,69 @@ CGFloat const kHMDefaultImageOffsetPercentY = 0.5;
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
-# pragma mark - MPPrintPaperDelegate
+#pragma mark - MPPrintDataSource
+
+- (void)printingItemForPaper:(MPPaper *)paper withCompletion:(void (^)(MPPrintItem * printItem))completion
+{
+    if (completion) {
+        completion([self.printItems firstObject]);
+    }
+}
+
+- (void)previewImageForPaper:(MPPaper *)paper withCompletion:(void (^)(UIImage *))completion
+{
+    if (completion) {
+        MPPrintItem *printItem = [self.printItems firstObject];
+        completion(printItem.printAsset);
+    }
+}
+
+- (NSInteger)numberOfPrintingItems
+{
+    return self.printItems.count;
+}
+
+- (NSArray *)printingItemsForPaper:(MPPaper *)paper
+{
+    return self.printItems;
+}
+
+#pragma mark - MPPrintPaperDelegate
 
 - (MPPaper *)defaultPaperForPrintSettings:(MPPrintSettings *)printSettings
 {
-    MPPaperSize size = MPPaperSize4x6;
-    if (5.0 == fminf(self.scrollView.paperSize.width, self.scrollView.paperSize.height)) {
-        size = MPPaperSize5x7;
-    }
-    return [[MPPaper alloc] initWithPaperSize:size paperType:MPPaperTypePhoto];;
+    return [self paperFromSettings];
 }
 
 - (NSArray *)supportedPapersForPrintSettings:(MPPrintSettings *)printSettings
 {
-    return @[ [self defaultPaperForPrintSettings:printSettings] ];
+    return @[ [self paperFromSettings] ];
 }
+
+#pragma mark - Printable Images
+
+- (NSArray<UIImage *> *)printableImages
+{
+    NSMutableArray *result = [NSMutableArray array];
+    UIImage *sourceImage = self.scrollView.image;
+    CGFloat scale = self.scrollView.paperScale / self.scrollView.imageScale;
+    CGPoint centerImage = CGPointMake(sourceImage.size.width * self.scrollView.imageOffsetPercent.x, sourceImage.size.height * self.scrollView.imageOffsetPercent.y);
+    CGSize size = CGSizeMake(self.scrollView.paperSize.width * scale, self.scrollView.paperSize.height * scale);
+    CGPoint origin = CGPointMake(centerImage.x - (self.scrollView.gridSize.width / 2.0) * size.width, centerImage.y - (self.scrollView.gridSize.height / 2.0) * size.height);
+    
+    for (int row = 0; row < self.scrollView.gridSize.height; row ++) {
+        for (int column = 0; column < self.scrollView.gridSize.width; column ++) {
+            UIGraphicsBeginImageContext(size);
+            CGPoint cellOrigin = CGPointMake(origin.x + size.width * column, origin.y + size.height * row);
+            [sourceImage drawAtPoint:CGPointMake(-cellOrigin.x, -cellOrigin.y)];
+            UIImage* cellImage = UIGraphicsGetImageFromCurrentImageContext();
+            [result addObject:cellImage];
+            UIGraphicsEndImageContext();
+        }
+    }
+    
+    return result;
+}
+
 
 @end

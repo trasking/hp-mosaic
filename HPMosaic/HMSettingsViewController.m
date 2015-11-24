@@ -73,7 +73,7 @@ NSUInteger const kHMPaperLandscapeSegmentIndex = 1;
 - (void)setupPaper
 {
     self.orientationSegmentedControl.selectedSegmentIndex = self.selectedPaperSize.width > self.selectedPaperSize.height ? kHMPaperLandscapeSegmentIndex : kHMPaperPortraitSegmentIndex;
-    self.paperSizeSegmentedControl.selectedSegmentIndex = 4.0 == fminf(self.selectedPaperSize.width, self.selectedPaperSize.height) ? kHMPaper4x6SegmentIndex : kHMPaper5x7SegmentIndex;
+    self.paperSizeSegmentedControl.selectedSegmentIndex = (4 == (int)fminf(self.selectedPaperSize.width, self.selectedPaperSize.height)) ? kHMPaper4x6SegmentIndex : kHMPaper5x7SegmentIndex;
 }
 
 #pragma mark - Buttons
