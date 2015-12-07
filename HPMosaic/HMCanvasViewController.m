@@ -24,7 +24,7 @@
 @property (strong, nonatomic) UIBarButtonItem *chooseBarButtonItem;
 @property (weak, nonatomic) IBOutlet HMScrollView *scrollView;
 @property (strong, nonatomic) NSURL *photoURL;
-@property (strong, nonatomic) NSArray<MPPrintItem *> *printItems;
+@property (strong, nonatomic) MPPrintItem *printItem;
 
 @end
 
@@ -80,6 +80,12 @@ CGFloat const kHMDefaultImageOffsetPercentY = 0.5;
     [MP sharedInstance].hidePaperSizeOption = YES;
     [MP sharedInstance].hidePaperTypeOption = YES;
     [MP sharedInstance].printPaperDelegate = self;
+    [MP sharedInstance].interfaceOptions.multiPageMaximumGutter = 0;
+    [MP sharedInstance].interfaceOptions.multiPageBleed = 40;
+    [MP sharedInstance].interfaceOptions.multiPageBackgroundPageScale = 0.61803399;
+    [MP sharedInstance].interfaceOptions.multiPageDoubleTapEnabled = YES;
+    [MP sharedInstance].interfaceOptions.multiPageZoomOnSingleTap = NO;
+    [MP sharedInstance].interfaceOptions.multiPageZoomOnDoubleTap = YES;
 }
 
 #pragma mark - User Defaults
@@ -404,15 +410,10 @@ CGFloat const kHMDefaultImageOffsetPercentY = 0.5;
     }
     MPLayout *layout = [MPLayoutFactory layoutWithType:[MPLayoutFill layoutType] orientation:orientation assetPosition:[MPLayout completeFillRectangle]];
     
-    NSMutableArray *printItems = [NSMutableArray array];
-    for (UIImage *image in [self printableImages]) {
-        MPPrintItem *printItem = [MPPrintItemFactory printItemWithAsset:image];
-        printItem.layout = layout;
-        [printItems addObject:printItem];
-    }
-    self.printItems = printItems;
+    self.printItem = [MPPrintItemFactory printItemWithAsset:[self printableImages]];
+    self.printItem.layout = layout;
     
-    UIViewController *vc = [[MP sharedInstance] printViewControllerWithDelegate:self dataSource:self printItem:[self.printItems firstObject] fromQueue:NO settingsOnly:NO];
+    UIViewController *vc = [[MP sharedInstance] printViewControllerWithDelegate:self dataSource:self printItem:self.printItem fromQueue:NO settingsOnly:NO];
     [self presentViewController:vc animated:YES completion:nil];
 }
 
@@ -442,26 +443,27 @@ CGFloat const kHMDefaultImageOffsetPercentY = 0.5;
 - (void)printingItemForPaper:(MPPaper *)paper withCompletion:(void (^)(MPPrintItem * printItem))completion
 {
     if (completion) {
-        completion([self.printItems firstObject]);
+        completion(self.printItem);
     }
 }
 
 - (void)previewImageForPaper:(MPPaper *)paper withCompletion:(void (^)(UIImage *))completion
 {
     if (completion) {
-        MPPrintItem *printItem = [self.printItems firstObject];
-        completion(printItem.printAsset);
+        NSArray *images = self.printItem.printAsset;
+        completion([images firstObject]);
     }
 }
 
 - (NSInteger)numberOfPrintingItems
 {
-    return self.printItems.count;
+    NSArray *images = self.printItem.printAsset;
+    return images.count;
 }
 
 - (NSArray *)printingItemsForPaper:(MPPaper *)paper
 {
-    return self.printItems;
+    return @[ self.printItem ];
 }
 
 #pragma mark - MPPrintPaperDelegate
