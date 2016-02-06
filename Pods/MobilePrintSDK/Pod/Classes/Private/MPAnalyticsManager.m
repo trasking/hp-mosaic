@@ -14,9 +14,19 @@
 #import "MPAnalyticsManager.h"
 #import "MPPageRange.h"
 #import "MPPrintManager.h"
+#import "MPPaper.h"
 #import <sys/sysctl.h>
 #import <SystemConfiguration/CaptiveNetwork.h>
 #import <CommonCrypto/CommonDigest.h>
+
+@interface MP()
+
+// expose this private method only to the private MPAnalyticsManager class
+- (NSString *)printLibraryVersion;
+
+@end
+
+@implementation MPAnalyticsManager
 
 NSString * const kMPMetricsServer = @"print-metrics-w1.twosmiles.com/api/v1/mobile_app_metrics";
 NSString * const kMPMetricsServerTestBuilds = @"print-metrics-test.twosmiles.com/api/v1/mobile_app_metrics";
@@ -52,7 +62,13 @@ NSString * const kMPMetricsLanguageCode = @"language_code";
 NSString * const kMPMetricsTimezoneDescription = @"timezone_description";
 NSString * const kMPMetricsTimezoneOffsetSeconds = @"timezone_offset_seconds";
 
-@implementation MPAnalyticsManager
+NSString * const kMPMetricsEventTypeID = @"event_type_id";
+NSString * const kMPMetricsPrintSessionID = @"print_session_id";
+NSString * const kMPMetricsEventCount = @"event_count";
+NSInteger const kMPMetricsEventInitialCount = 1;
+
+NSString * const kMPMetricsEventTypePrintInitiated = @"1";
+NSString * const kMPMetricsEventTypePrintCompleted = @"5";
 
 #pragma mark - Initialization
 
@@ -67,16 +83,32 @@ NSString * const kMPMetricsTimezoneOffsetSeconds = @"timezone_offset_seconds";
     return sharedManager;
 }
 
-- (NSURL *)metricsServerURL
+- (NSURL *)metricsServerPrintMetricsURL
 {
     NSURL *productionURL = [NSURL URLWithString:[NSString stringWithFormat:@"https://%@:%@@%@", kMPMetricsUsername, kMPMetricsPassword, kMPMetricsServer]];
     NSURL *testURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@:%@@%@", kMPMetricsUsername, kMPMetricsPassword, kMPMetricsServerTestBuilds]];
     NSString *provisionPath = [[NSBundle mainBundle] pathForResource:@"embedded" ofType:@"mobileprovision"];
+
+    // The following is adapted from: http://stackoverflow.com/questions/26081543/how-to-tell-at-runtime-whether-an-ios-app-is-running-through-a-testflight-beta-i
+    BOOL sandboxReceipt = [[[[NSBundle mainBundle] appStoreReceiptURL] lastPathComponent] isEqualToString:@"sandboxReceipt"];
+    
     NSURL *metricsURL = testURL;
-    if (!provisionPath && !TARGET_IPHONE_SIMULATOR) {
+    if (!provisionPath && !sandboxReceipt && !TARGET_IPHONE_SIMULATOR) {
         metricsURL = productionURL;
     }
     return metricsURL;
+}
+
+- (NSURL *)metricsServerEventsURL
+{
+    NSString *printMetricsURL = [self metricsServerPrintMetricsURL].absoluteString;
+    NSString *eventsURL = [printMetricsURL stringByReplacingOccurrencesOfString:@"v1/mobile_app_metrics" withString:@"v2/events"];
+    return [NSURL URLWithString:eventsURL];
+}
+
+- (void)setPrintSessionId:(NSString *)printSessionId
+{
+    _printSessionId = printSessionId;
 }
 
 #pragma mark - Gather metrics
@@ -89,6 +121,7 @@ NSString * const kMPMetricsTimezoneOffsetSeconds = @"timezone_offset_seconds";
     NSString *osVersion = [[UIDevice currentDevice] systemVersion];
     NSString *displayName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
     NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier];
+    NSString *printLibraryVersion = [MP sharedInstance].printLibraryVersion;
     NSDictionary *metrics = @{
                               kMPMetricsDeviceBrand : [self nonNullString:kMPManufacturer],
                               kMPMetricsDeviceID : [self nonNullString:[self userUniqueIdentifier]],
@@ -99,11 +132,11 @@ NSString * const kMPMetricsTimezoneOffsetSeconds = @"timezone_offset_seconds";
                               kMPMetricsProductID : [self nonNullString:bundleID],
                               kMPMetricsProductName : [self nonNullString:displayName],
                               kMPMetricsVersion : [self nonNullString:completeVersion],
-                              kMPMetricsPrintLibraryVersion :kMPLibraryVersion,
+                              kMPMetricsPrintLibraryVersion :[self nonNullString:printLibraryVersion],
                               kMPMetricsWiFiSSID : [MPAnalyticsManager wifiName],
-                              kMPMetricsCountryCode : [[NSLocale currentLocale] objectForKey:NSLocaleCountryCode],
-                              kMPMetricsLanguageCode : [[NSLocale currentLocale] objectForKey:NSLocaleLanguageCode],
-                              kMPMetricsTimezoneDescription : [NSTimeZone systemTimeZone].description,
+                              kMPMetricsCountryCode : [self nonNullString:[[NSLocale currentLocale] objectForKey:NSLocaleCountryCode]],
+                              kMPMetricsLanguageCode : [self nonNullString:[[NSLocale currentLocale] objectForKey:NSLocaleLanguageCode]],
+                              kMPMetricsTimezoneDescription : [self nonNullString:[NSTimeZone systemTimeZone].description],
                               kMPMetricsTimezoneOffsetSeconds : [NSString stringWithFormat:@"%ld", (long)[NSTimeZone systemTimeZone].secondsFromGMT]
                               };
     
@@ -113,7 +146,25 @@ NSString * const kMPMetricsTimezoneOffsetSeconds = @"timezone_offset_seconds";
 - (NSDictionary *)printMetricsForOfframp:(NSString *)offramp
 {
     if ([MPPrintManager printNowOfframp:offramp]) {
-        return [MP sharedInstance].lastOptionsUsed;
+        NSMutableDictionary *lastOptions = [[MP sharedInstance].lastOptionsUsed mutableCopy];
+        
+        NSString *paperType = [lastOptions objectForKey:kMPPaperTypeId];
+        if (paperType) {
+            NSString *analyticsPaperType = [MPPaper constantPaperTypeFromTitle:paperType];
+            if (analyticsPaperType) {
+                [lastOptions setObject:analyticsPaperType forKey:kMPPaperTypeId];
+            }
+        }
+
+        NSString *paperSize = [lastOptions objectForKey:kMPPaperSizeId];
+        if (paperSize) {
+            NSString *analyticsPaperSize = [MPPaper constantPaperSizeFromTitle:paperSize];
+            if (analyticsPaperSize) {
+                [lastOptions setObject:analyticsPaperSize forKey:kMPPaperSizeId];
+            }
+        }
+
+        return lastOptions;
     } else {
         return [NSDictionary dictionaryWithObjectsAndKeys:
                 kMPNoPrint, kMPBlackAndWhiteFilterId,
@@ -226,12 +277,38 @@ NSString * const kMPMetricsTimezoneOffsetSeconds = @"timezone_offset_seconds";
     [metrics addEntriesFromDictionary:[self printMetricsForOfframp:[options objectForKey:kMPOfframpKey]]];
     [metrics addEntriesFromDictionary:[self contentOptionsForPrintItem:printItem]];
     [metrics addEntriesFromDictionary:options];
-
-    [self sanitizeMetrics:metrics];
     
+    [self sendMetrics:metrics toURL:[self metricsServerPrintMetricsURL]];
+}
+
+- (void)trackUserFlowEventWithId:(NSString *)eventId
+{
+    NSString *eventCount = [self eventCountForId:eventId];
+    NSMutableDictionary *metrics = [NSMutableDictionary dictionaryWithDictionary:[self baseMetrics]];
+    [metrics addEntriesFromDictionary:@{
+                                        kMPMetricsEventTypeID:eventId,
+                                        kMPMetricsEventCount:eventCount,
+                                        kMPMetricsPrintSessionID:[self nonNullString:self.printSessionId]
+                                        }];
+
+    if (!self.printSessionId) {
+        MPLogWarn(@"Unexpected missing print session ID for event:\n\n%@", metrics);
+    }
+
+    [self sendMetrics:metrics toURL:[self metricsServerEventsURL]];
+    
+    if (kMPMetricsEventTypePrintCompleted == eventId) {
+        _printSessionId = nil;
+    }
+}
+
+- (void)sendMetrics:(NSMutableDictionary *)metrics toURL:(NSURL *)url
+{
+    [self sanitizeMetrics:metrics];
+
     NSData *bodyData = [self postBodyWithValues:metrics];
     NSString *bodyLength = [NSString stringWithFormat:@"%ld", (long)[bodyData length]];
-    NSMutableURLRequest *urlRequest = [NSMutableURLRequest requestWithURL:[self metricsServerURL]];
+    NSMutableURLRequest *urlRequest = [NSMutableURLRequest requestWithURL:url];
     [urlRequest setHTTPMethod:@"POST"];
     [urlRequest setHTTPBody:bodyData];
     [urlRequest addValue:bodyLength forHTTPHeaderField: @"Content-Length"];
@@ -240,6 +317,26 @@ NSString * const kMPMetricsTimezoneOffsetSeconds = @"timezone_offset_seconds";
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         [self sendMetricsData:urlRequest];
     });
+}
+
+- (NSString *)eventCountForId:(NSString *)eventId
+{
+    NSString *key = [NSString stringWithFormat:@"%@_%@", kMPMetricsEventTypeID, eventId];
+    NSNumber *newValue = [NSNumber numberWithInteger:kMPMetricsEventInitialCount];
+    @synchronized(self) {
+        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+        NSNumber *currentValue = [defaults objectForKey:key];
+        if (currentValue) {
+            newValue = [NSNumber numberWithInteger:[currentValue integerValue] + 1];
+        }
+        [defaults setObject:newValue forKey:key];
+        [defaults synchronize];
+        if (kMPMetricsEventTypePrintInitiated == eventId) {
+            _printSessionId = [newValue stringValue];
+        }
+    }
+    
+    return [newValue stringValue];
 }
 
 - (NSData *)postBodyWithValues:(NSDictionary *)values

@@ -23,7 +23,7 @@
     
     if ([asset isKindOfClass:[UIImage class]]) {
         printItem = [[MPPrintItemImage alloc] initWithImage:asset];
-    } else if ([asset isKindOfClass:[NSArray<UIImage *> class]]) {
+    } else if ([asset isKindOfClass:[NSArray class]]) {
         printItem = [[MPPrintItemImage alloc] initWithImages:asset];
     } else if ([asset isKindOfClass:[NSData class]]) {
         printItem = [[MPPrintItemImage alloc] initWithData:asset];

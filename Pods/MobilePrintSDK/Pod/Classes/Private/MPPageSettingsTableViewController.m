@@ -115,6 +115,7 @@
 @property (weak, nonatomic) IBOutlet UIView *footerView;
 
 @property (strong, nonatomic) UIButton *pageSelectionMark;
+@property (strong, nonatomic) UIButton *pageSelectionExtendedArea;
 @property (strong, nonatomic) UIImage *selectedPageImage;
 @property (strong, nonatomic) UIImage *unselectedPageImage;
 
@@ -136,6 +137,8 @@
 @property (assign, nonatomic) BOOL editing;
 @property (weak, nonatomic) IBOutlet UIView *headerInactivityView;
 
+@property (assign, nonatomic) NSInteger currentPrintJob;
+
 @end
 
 @implementation MPPageSettingsTableViewController
@@ -148,11 +151,15 @@ NSString * const kPageSettingsScreenName = @"Print Preview Screen";
 NSString * const kPrintFromQueueScreenName = @"Add Job Screen";
 NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
 
+CGFloat const kMPPreviewHeightRatio = 0.61803399; // golden ratio
+
 #pragma mark - UIView
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    self.currentPrintJob = 0;
     
     if( nil == self.delegateManager ) {
         self.delegateManager = [[MPPrintSettingsDelegateManager alloc] init];
@@ -160,7 +167,7 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
     
     self.mp = [MP sharedInstance];
     
-    self.cancelBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStylePlain target:self action:@selector(cancelButtonTapped:)];
+    self.cancelBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:MPLocalizedString(@"Cancel", @"button bar cancel button") style:UIBarButtonItemStylePlain target:self action:@selector(cancelButtonTapped:)];
 
     if( self.mp.pageSettingsCancelButtonLeft ) {
         self.navigationItem.leftBarButtonItem = self.cancelBarButtonItem;
@@ -257,6 +264,7 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
     self.jobNameCell.backgroundColor = [self.mp.appearance.settings objectForKey:kMPSelectionOptionsBackgroundColor];
     self.jobNameLabel.font = [self.mp.appearance.settings objectForKey:kMPSelectionOptionsSecondaryFont];
     self.jobNameLabel.textColor = [self.mp.appearance.settings objectForKey:kMPSelectionOptionsPrimaryFontColor];
+    self.jobNameLabel.text = MPLocalizedString(@"Name", @"job name label");
     self.jobNameTextField.font = [self.mp.appearance.settings objectForKey:kMPSelectionOptionsSecondaryFont];
     self.jobNameTextField.textColor = [self.mp.appearance.settings objectForKey:kMPSelectionOptionsSecondaryFontColor];
     self.jobNameTextField.returnKeyType = UIReturnKeyDone;
@@ -272,10 +280,17 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
 
     self.pageRangeLabel.font = [self.mp.appearance.settings objectForKey:kMPSelectionOptionsPrimaryFont];
     self.pageRangeLabel.textColor = [self.mp.appearance.settings objectForKey:kMPSelectionOptionsPrimaryFontColor];
+    self.pageRangeLabel.text = MPLocalizedString(@"Page Range", @"Used to specify that a range of pages can be displayed");
     self.pageRangeDetailTextField.font = [self.mp.appearance.settings objectForKey:kMPSelectionOptionsSecondaryFont];
     self.pageRangeDetailTextField.textColor = [self.mp.appearance.settings objectForKey:kMPSelectionOptionsSecondaryFontColor];
     self.pageRangeDetailTextField.delegate = self;
     
+    self.pageSelectionExtendedArea = [UIButton buttonWithType:UIButtonTypeCustom];
+    self.pageSelectionExtendedArea.backgroundColor = [UIColor clearColor];
+    self.pageSelectionExtendedArea.adjustsImageWhenHighlighted = NO;
+    [self.pageSelectionExtendedArea addTarget:self action:@selector(pageSelectionMarkClicked) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:self.pageSelectionExtendedArea];
+
     self.selectedPageImage = [self.mp.appearance.settings objectForKey:kMPJobSettingsSelectedPageIcon];
     self.unselectedPageImage = [self.mp.appearance.settings objectForKey:kMPJobSettingsUnselectedPageIcon];
     self.pageSelectionMark = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -308,8 +323,10 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
     
     self.footerHeadingLabel.font = [self.mp.appearance.settings objectForKey:kMPGeneralBackgroundPrimaryFont];
     self.footerHeadingLabel.textColor = [self.mp.appearance.settings objectForKey:kMPGeneralBackgroundPrimaryFontColor];
+    self.footerHeadingLabel.text = MPLocalizedString(@"What is Print Queue?", @"footer heading describing print queue");
     self.footerTextLabel.font = [self.mp.appearance.settings objectForKey:kMPGeneralBackgroundSecondaryFont];
     self.footerTextLabel.textColor = [self.mp.appearance.settings objectForKey:kMPGeneralBackgroundSecondaryFontColor];
+    self.footerTextLabel.text = MPLocalizedString(@"Add a print to the Print Queue and receive a notification when you are near your printer.  Tap your notification or simply come back to this app to print your projects.", @"fotter text describing print queue");
     
     [self updatePrintSettingsUI];
     [[MPPrinter sharedInstance] checkLastPrinterUsedAvailability];
@@ -330,13 +347,32 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
                                                                          repeats:YES];
     }
 
+    if (MPPageSettingsModePrint == self.mode || MPPageSettingsModePrintFromQueue == self.mode) {
+        [[MPAnalyticsManager sharedManager] trackUserFlowEventWithId:kMPMetricsEventTypePrintInitiated];
+    }
+    
     [self preparePrintManager];
     [self refreshData];
+}
+
+- (void)configureSettingsForPrintLaterJob:(MPPrintLaterJob *)printLaterJob
+{
+    self.delegateManager.jobName = printLaterJob.name;
+
+    if( MPPageSettingsModeAddToQueue != self.mode ) {
+        self.delegateManager.pageRange = printLaterJob.pageRange;
+        self.delegateManager.blackAndWhite = printLaterJob.blackAndWhite;
+        self.delegateManager.numCopies = printLaterJob.numCopies;
+    }
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    
+    if (MPPageSettingsModePrintFromQueue != self.mode) {
+        [self.multiPageView setBlackAndWhite:self.delegateManager.blackAndWhite];
+    }
     
     [self preparePrintManager];
 
@@ -348,15 +384,16 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
                 [[MPWiFiReachability sharedInstance] noPrintingAlert];
             }
         }
+        
+        if ((MPPageSettingsModePrintFromQueue == self.mode && 1 == self.printLaterJobs.count) ||
+            (MPPageSettingsModePrintFromQueue != self.mode && 1 == self.printItem.numberOfPages)) {
+            [self.multiPageView showPageNumberLabel:NO];
+        }
     }
     
-    if( self.printLaterJob ) {
-        if( MPPageSettingsModeAddToQueue != self.mode ) {
-            self.delegateManager.pageRange = self.printLaterJob.pageRange;
-            self.delegateManager.blackAndWhite = self.printLaterJob.blackAndWhite;
-            self.delegateManager.numCopies = self.printLaterJob.numCopies;
-        }
-        self.delegateManager.jobName = self.printLaterJob.name;
+    MPPrintLaterJob *printLaterJob = self.printLaterJobs[self.currentPrintJob];
+    if( printLaterJob ) {
+        [self configureSettingsForPrintLaterJob:printLaterJob];
     }
     
     if( MPPageSettingsDisplayTypePreviewPane == self.displayType ) {
@@ -403,6 +440,12 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
                                                object:nil];
 
     [[NSNotificationCenter defaultCenter] postNotificationName:kMPTrackableScreenNotification object:nil userInfo:[NSDictionary dictionaryWithObject:screenName forKey:kMPTrackableScreenNameKey]];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self  selector:@selector(orientationChanged:)  name:UIDeviceOrientationDidChangeNotification  object:nil];
+
+    [self setPreviewPaneFrame];
+
+    [self.multiPageView refreshLayout];
 }
 
 -  (void)viewWillDisappear:(BOOL)animated
@@ -417,37 +460,58 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
     self.printManager.delegate = nil;
 }
 
--(void)viewDidAppear:(BOOL)animated
-{
-    [super viewDidAppear:animated];
-        
-    [self.multiPageView refreshLayout];
-}
-
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+
+    [self.multiPageView cancelZoom];
+
+    self.multiPageView.rotationInProgress = YES;
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+        [self refreshPreviewLayout];
+    } completion:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+        [self refreshPreviewLayout];
+        [self.tableView reloadData];
+        self.multiPageView.rotationInProgress = NO;
+    }];
+}
+
+- (void)orientationChanged:(NSNotification *)notification{
+    [self.multiPageView cancelZoom];
+    [self refreshPreviewLayout];
+}
+
+- (void)refreshPreviewLayout
+{
+    [self setPreviewPaneFrame];
+    [self setPageRangeKeyboardView];
+    [self.multiPageView refreshLayout];
+}
+
+- (void)setPreviewPaneFrame
+{
+    CGSize size = self.tableView.bounds.size;
+    CGRect frame = self.tableView.tableHeaderView.frame;
     
-    if( MPPageSettingsDisplayTypePreviewPane == self.displayType ) {
-        CGRect frame = self.tableView.tableHeaderView.frame;
-        frame.size.height = size.height - self.jobSummaryCell.frame.size.height - 1;
-        self.tableView.tableHeaderView.frame = frame;
-        
-        [self.multiPageView refreshLayout];
-        
-        // without this seemingly useless line, the header view is not displayed in the appropriate frame
-        self.tableView.tableHeaderView = self.tableView.tableHeaderView;
+    CGFloat height = 0.0;
+    if (MPPageSettingsDisplayTypePreviewPane == self.displayType) {
+        height = size.height - self.jobSummaryCell.frame.size.height - 1;
+    } else if (MPPageSettingsDisplayTypeSingleView == self.displayType) {
+        CGFloat printHeight = 2 * (self.tableView.rowHeight + SEPARATOR_SECTION_FOOTER_HEIGHT);
+        height = fminf(size.height - printHeight, size.height * kMPPreviewHeightRatio);
     }
     
-    [self setPageRangeKeyboardView];
+    frame.size.height = height;
+    self.tableView.tableHeaderView.frame = frame;
     
-    [self.tableView reloadData];
+    // without this seemingly useless line, the header view is not displayed in the appropriate frame
+    self.tableView.tableHeaderView = self.tableView.tableHeaderView;
 }
 
 - (void)viewDidLayoutSubviews
 {
     [self.view layoutIfNeeded];
-    
+    [self.tableView bringSubviewToFront:self.pageSelectionExtendedArea];
     [self.tableView bringSubviewToFront:self.pageSelectionMark];
 }
 
@@ -469,14 +533,16 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
                 if (printItem) {
                     dispatch_async(dispatch_get_main_queue(), ^{
                         self.printItem = printItem;
+                        [self refreshData];
                     });
                 } else {
                     MPLogError(@"Missing printing item or preview image");
                 }
             }];
         } else {
-            if( nil != self.printLaterJob ) {
-                self.printItem = [self.printLaterJob printItemForPaperSize:self.delegateManager.paper.sizeTitle];
+            MPPrintLaterJob *printLaterJob = self.printLaterJobs[self.currentPrintJob];
+            if( nil != printLaterJob ) {
+                self.printItem = [printLaterJob printItemForPaperSize:self.delegateManager.paper.sizeTitle];
             }
 
             [self configureMultiPageViewWithPrintItem:self.printItem];
@@ -486,7 +552,19 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
 
 - (BOOL)showPageRange
 {
-    return self.printItem.numberOfPages > 1;
+    BOOL showPageRange = NO;
+    
+    if (MPPageSettingsModePrintFromQueue == self.mode && self.multiPageView) {
+        MPPrintLaterJob *job = self.printLaterJobs[self.multiPageView.currentPage-1];
+        MPPrintItem *item = [job.printItems objectForKey:self.delegateManager.printSettings.paper.sizeTitle];
+        if (item.numberOfPages > 1) {
+            showPageRange = YES;
+        }
+    } else {
+        showPageRange = self.printItem.numberOfPages > 1;
+    }
+    
+    return showPageRange;
 }
 
 // Hide or show UI that will always be hidden or shown based on the iOS version
@@ -514,6 +592,7 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
     self.paperTypeCell.hidden = self.mp.hidePaperTypeOption || [[self.delegateManager.printSettings.paper supportedTypes] count] == 1;
     self.pageRangeCell.hidden = ![self showPageRange];
     self.pageSelectionMark.hidden = ![self showPageRange];
+    self.pageSelectionExtendedArea.hidden = self.pageSelectionMark.hidden;
     
     if (MPPageSettingsModeAddToQueue == self.mode) {
         self.jobNameCell.hidden = NO;
@@ -527,6 +606,11 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
         self.numberOfCopiesCell.hidden = YES;
         self.pageRangeCell.hidden = YES;
         self.pageSelectionMark.hidden = YES;
+    } else if (MPPageSettingsModePrintFromQueue == self.mode) {
+        self.numberOfCopiesCell.hidden = YES;
+        self.pageRangeCell.hidden = YES;
+        self.pageSelectionMark.hidden = YES;
+        self.filterCell.hidden = YES;
     } else {
         if (IS_OS_8_OR_LATER){
             if (nil != self.delegateManager.printSettings.printerName){
@@ -559,16 +643,6 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
         self.previewJobSummaryCell.hidden = YES;
     }
     
-    if ([self.dataSource respondsToSelector:@selector(numberOfPrintingItems)]) {
-        NSInteger numberOfJobs = [self.dataSource numberOfPrintingItems];
-        if (numberOfJobs > 1) {
-            self.numberOfCopiesCell.hidden = YES;
-            self.filterCell.hidden = YES;
-            self.pageRangeCell.hidden = YES;
-            self.printLabel.text = MPLocalizedString(@"Print All", @"Print all pages in a document");
-        }
-    }
-    
     [self prepareUiForIosVersion];
 
     [self.tableView endUpdates];
@@ -597,6 +671,12 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
     
     if( MPPageSettingsModeAddToQueue == self.mode ) {
         self.printLabel.text = self.delegateManager.printLaterLabelText;
+    } else if( MPPageSettingsModePrintFromQueue == self.mode ) {
+        if (self.printLaterJobs.count > 1) {
+            self.printLabel.text = self.delegateManager.printMultipleJobsFromQueueLabelText;
+        } else {
+            self.printLabel.text = self.delegateManager.printSingleJobFromQueueLabelText;
+        }
     } else {
         self.printLabel.text = self.delegateManager.printLabelText;
     }
@@ -661,10 +741,25 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
 - (void)configureMultiPageViewWithPrintItem:(MPPrintItem *)printItem
 {
     if (self.delegateManager.printSettings.paper) {
-        self.multiPageView.blackAndWhite = self.delegateManager.blackAndWhite;
-        [self.multiPageView setInterfaceOptions:[MP sharedInstance].interfaceOptions];
-        NSArray *images = [printItem previewImagesForPaper:self.delegateManager.printSettings.paper];
-        [self.multiPageView setPages:images paper:self.delegateManager.printSettings.paper layout:printItem.layout];
+        NSInteger numPages = printItem.numberOfPages;
+        
+        if (MPPageSettingsModePrintFromQueue == self.mode) {
+            numPages = self.printLaterJobs.count;
+        }
+        [self.multiPageView configurePages:numPages paper:self.delegateManager.printSettings.paper layout:printItem.layout];
+        
+        if (MPPageSettingsModePrintFromQueue == self.mode) {
+            NSInteger jobNum = 1;
+            for (MPPrintLaterJob* job in self.printLaterJobs) {
+                if (job.blackAndWhite) {
+                    [self.multiPageView setPageNum:jobNum blackAndWhite:YES];
+                }
+                
+                jobNum++;
+            }
+        } else {
+            self.multiPageView.blackAndWhite = self.delegateManager.blackAndWhite;
+        }
     }
 }
 
@@ -682,7 +777,7 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
 
 -(void)respondToMultiPageViewAction
 {
-    if( self.printItem.numberOfPages > 1 ) {
+    if( self.printItem.numberOfPages > 1  &&  MPPageSettingsModePrintFromQueue != self.mode) {
         BOOL includePage = self.pageSelectionMark.imageView.image == self.unselectedPageImage;
         
         [self.delegateManager includePageInPageRange:includePage pageNumber:self.multiPageView.currentPage];
@@ -947,6 +1042,7 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
         self.numberOfCopiesStepper.userInteractionEnabled = NO;
         self.blackAndWhiteModeSwitch.userInteractionEnabled = NO;
         self.pageSelectionMark.userInteractionEnabled = NO;
+        self.pageSelectionExtendedArea.userInteractionEnabled = NO;
     } else {
         [self.tableView removeGestureRecognizer:tableViewTaps];
         [self.headerInactivityView removeGestureRecognizer:headerInactivityViewTaps];
@@ -956,6 +1052,7 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
         self.numberOfCopiesStepper.userInteractionEnabled = YES;
         self.blackAndWhiteModeSwitch.userInteractionEnabled = YES;
         self.pageSelectionMark.userInteractionEnabled = YES;
+        self.pageSelectionExtendedArea.userInteractionEnabled = YES;
         
         self.jobNameTextField.userInteractionEnabled = YES;
         self.pageRangeDetailTextField.userInteractionEnabled = YES;
@@ -1068,7 +1165,14 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
 - (IBAction)blackAndWhiteSwitchToggled:(id)sender
 {
     self.delegateManager.blackAndWhite = self.blackAndWhiteModeSwitch.on;
-    self.multiPageView.blackAndWhite = self.delegateManager.blackAndWhite;
+    if (MPPageSettingsModePrintFromQueue == self.mode) {
+        MPPrintLaterJob *job = self.printLaterJobs[self.multiPageView.currentPage-1];
+        job.blackAndWhite = self.delegateManager.blackAndWhite;
+        [self.multiPageView setPageNum:self.multiPageView.currentPage blackAndWhite:job.blackAndWhite];
+    } else {
+        self.multiPageView.blackAndWhite = self.delegateManager.blackAndWhite;
+    }
+    
     [self refreshData];
 }
 
@@ -1100,8 +1204,6 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
                nil == self.printItem) {
         return 0;
 
-    } else if (PAGE_RANGE_SECTION == section && ![self showPageRange]) {
-        return 0;
     } else if (NUMBER_OF_COPIES_SECTION == section && !IS_OS_8_OR_LATER) {
         return 0;
     }
@@ -1134,20 +1236,39 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
     return cell;
 }
 
-
-
 #pragma mark - UITableViewDelegate
 
 - (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if( !self.previewViewController  &&  cell == self.jobSummaryCell ) {
+        
+        NSInteger imageSize = 30;
+        NSInteger extendedSize = 75;
+        NSInteger yOffset = 12.5;
+        
+        CGRect pageFrame = [self.multiPageView currentPageFrame];
+        CGFloat xOrigin = self.view.frame.size.width - 55;
+        if( !CGRectEqualToRect(pageFrame, CGRectZero) ) {
+            xOrigin = pageFrame.origin.x + pageFrame.size.width - imageSize/2;
+        }
+
+        // the page selection image
         CGRect frame = self.jobSummaryCell.frame;
-        frame.origin.x = self.view.frame.size.width - 55;
-        frame.origin.y = self.jobSummaryCell.frame.origin.y - 12.5;
-        frame.size.width = 32;
-        frame.size.height = 32;
+        frame.origin.x = xOrigin;
+        frame.origin.y = self.jobSummaryCell.frame.origin.y - yOffset;
+        frame.size.width = imageSize;
+        frame.size.height = imageSize;
         
         self.pageSelectionMark.frame = [self.jobSummaryCell.superview convertRect:frame toView:self.view];
+        
+        // the active area
+        CGFloat extendedOffset = (extendedSize - imageSize)/2;
+        frame.origin.x -= extendedOffset;
+        frame.origin.y -= extendedOffset;
+        frame.size.width = extendedSize;
+        frame.size.height = extendedSize;
+        
+        self.pageSelectionExtendedArea.frame = frame;
     }
 }
 
@@ -1187,7 +1308,16 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
             if( section == PREVIEW_PRINT_SUMMARY_SECTION ||
                 section == PRINT_FUNCTION_SECTION        ||
                 section == PRINT_JOB_NAME_SECTION        ||
-                section == NUMBER_OF_COPIES_SECTION        ) {
+                section == NUMBER_OF_COPIES_SECTION      ||
+                (section == PAGE_RANGE_SECTION  &&  [self showPageRange])) {
+                
+                height = SEPARATOR_SECTION_FOOTER_HEIGHT;
+            }
+        } else if( MPPageSettingsModePrintFromQueue == self.mode ) {
+            if( section == PREVIEW_PRINT_SUMMARY_SECTION ||
+                section == PRINT_FUNCTION_SECTION        ||
+                section == PRINT_JOB_NAME_SECTION        ||
+                section == PRINTER_SELECTION_SECTION) {
                 
                 height = SEPARATOR_SECTION_FOOTER_HEIGHT;
             }
@@ -1208,7 +1338,7 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
                         height = PRINTER_WARNING_SECTION_FOOTER_HEIGHT;
                     }
                 }
-            } else if (section == PAGE_RANGE_SECTION) {
+            } else if (section == PAGE_RANGE_SECTION  &&  [self showPageRange]) {
                 height = SEPARATOR_SECTION_FOOTER_HEIGHT;
             }
             else if (IS_OS_8_OR_LATER && (section == NUMBER_OF_COPIES_SECTION)) {
@@ -1312,18 +1442,19 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
 
 - (void) addJobToPrintQueue
 {
-    self.printLaterJob.pageRange = self.delegateManager.pageRange;
-    self.printLaterJob.name = self.delegateManager.jobName;
-    self.printLaterJob.numCopies = self.delegateManager.numCopies;
-    self.printLaterJob.blackAndWhite = self.delegateManager.blackAndWhite;
+    MPPrintLaterJob *printLaterJob = self.printLaterJobs[self.currentPrintJob];
+    printLaterJob.pageRange = self.delegateManager.pageRange;
+    printLaterJob.name = self.delegateManager.jobName;
+    printLaterJob.numCopies = self.delegateManager.numCopies;
+    printLaterJob.blackAndWhite = self.delegateManager.blackAndWhite;
     
     NSString *titleForInitialPaperSize = [MPPaper titleFromSize:[MP sharedInstance].defaultPaper.paperSize];
-    MPPrintItem *printItem = [self.printLaterJob.printItems objectForKey:titleForInitialPaperSize];
+    MPPrintItem *printItem = [printLaterJob.printItems objectForKey:titleForInitialPaperSize];
     
     if (printItem == nil) {
         MPLogError(@"At least the printing item for the initial paper size (%@) must be provided", titleForInitialPaperSize);
     } else {
-        BOOL result = [[MPPrintLaterQueue sharedInstance] addPrintLaterJob:self.printLaterJob fromController:self];
+        BOOL result = [[MPPrintLaterQueue sharedInstance] addPrintLaterJob:printLaterJob fromController:self];
         
         if (result) {
             if ([self.printLaterDelegate respondsToSelector:@selector(didFinishAddPrintLaterFlow:)]) {
@@ -1419,7 +1550,7 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
         MPLogWarn(@"%lu MPPrintItems and %lu MPPageRanges.  Using default values for all MPPageRanges.", (unsigned long)self.itemsToPrint.count, (unsigned long)self.pageRanges.count);
         self.pageRanges = [[NSMutableArray alloc] initWithCapacity:self.itemsToPrint.count];
         for (int i=0; i<self.itemsToPrint.count; i++) {
-            [self.pageRanges insertObject:[[MPPageRange alloc] initWithString:@"All" allPagesIndicator:@"All" maxPageNum:firstItem.numberOfPages sortAscending:TRUE] atIndex:i];
+            [self.pageRanges insertObject:[[MPPageRange alloc] initWithString:MPLocalizedString(@"All", nil) allPagesIndicator:MPLocalizedString(@"All", nil) maxPageNum:firstItem.numberOfPages sortAscending:TRUE] atIndex:i];
         }
     }
     
@@ -1556,6 +1687,8 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
     
     if (completed) {
         
+        [[MPAnalyticsManager sharedManager] trackUserFlowEventWithId:kMPMetricsEventTypePrintCompleted];
+        
         [self setDefaultPrinter];
     
         if ([self.printDelegate respondsToSelector:@selector(didFinishPrintFlow:)]) {
@@ -1598,24 +1731,44 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
     }
     self.printManager.delegate = self;
 
-    MPPrintManagerOptions options = MPPrintManagerOriginCustom;
-    if ([self.printDelegate class] == [MPPrintActivity class]) {
-        options = MPPrintManagerOriginShare;
-    } else if ([self.printDelegate class] == [MPPrintJobsViewController class]) {
-        options = MPPrintManagerOriginQueue;
-    }
-
-    if ([self.dataSource respondsToSelector:@selector(numberOfPrintingItems)]) {
-        if ([self.dataSource numberOfPrintingItems] > 1) {
-            options += MPPrintManagerMultiJob;
-        }
-    }
-    
-    self.printManager.options = options;
-    
+    [self.printManager setOptionsForPrintDelegate:self.printDelegate dataSource:self.dataSource];
 }
 
 #pragma mark - MPMultipageViewDelegate
+
+- (UIImage *)multiPageView:(MPMultiPageView *)multiPageView getImageForPage:(NSUInteger)pageNumber
+{
+    UIImage *image = nil;
+    
+    if (MPPageSettingsModePrintFromQueue == self.mode) {
+        if (pageNumber > 0  &&  pageNumber <= [self.printLaterJobs count]) {
+            MPPrintLaterJob *printLaterJob = self.printLaterJobs[pageNumber-1];
+            MPPrintItem *printItem = [printLaterJob.printItems objectForKey:self.delegateManager.printSettings.paper.sizeTitle];
+            
+            image = [printItem previewImageForPage:1 paper:self.delegateManager.printSettings.paper];
+        }
+    } else if( pageNumber <= self.printItem.numberOfPages ) {
+        image = [self.printItem previewImageForPage:pageNumber paper:self.delegateManager.printSettings.paper];
+    }
+    return image;
+}
+
+- (BOOL)multiPageView:(MPMultiPageView *)multiPageView useMultiPageIndicatorForPage:(NSUInteger)pageNumber
+{
+    BOOL useIndicator = NO;
+    
+    if (MPPageSettingsModePrintFromQueue == self.mode) {
+        if (pageNumber > 0  &&  pageNumber <= self.printLaterJobs.count) {
+            MPPrintLaterJob *printLaterJob = self.printLaterJobs[pageNumber-1];
+            MPPrintItem *printItem = [printLaterJob.printItems objectForKey:self.delegateManager.printSettings.paper.sizeTitle];
+            if (printItem.numberOfPages > 1) {
+                useIndicator = YES;
+            }
+        }
+    }
+    
+    return useIndicator;
+}
 
 - (void)multiPageView:(MPMultiPageView *)multiPageView didChangeFromPage:(NSUInteger)oldPageNumber ToPage:(NSUInteger)newPageNumber
 {
@@ -1632,6 +1785,11 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
         }
         
         [self updateSelectedPageIcon:pageSelected];
+        
+        if (MPPageSettingsModePrintFromQueue == self.mode  &&  self.printLaterJobs.count >= newPageNumber) {
+            [self configureSettingsForPrintLaterJob:self.printLaterJobs[newPageNumber-1]];
+            self.blackAndWhiteModeSwitch.on = self.delegateManager.blackAndWhite;
+        }
     }
 }
 
@@ -1640,6 +1798,18 @@ NSString * const kSettingsOnlyScreenName = @"Print Settings Screen";
     if (MPPageSettingsModeSettingsOnly != self.mode) {
         [self respondToMultiPageViewAction];
     }
+}
+
+- (CGFloat)multiPageView:(MPMultiPageView *)multiPageView shrinkPageVertically:(NSInteger)pageNum
+{
+    CGFloat verticalShrink = 0.0;
+    
+    // we shrink the space vertically if the page selection mark will be present
+    if (self.printItem.numberOfPages > 1) {
+        verticalShrink = 10;
+    }
+    
+    return verticalShrink;
 }
 
 #pragma mark - UIGestureRecognizerDelegate

@@ -161,9 +161,7 @@ NSString * const kJobListScreenName = @"Job List Screen";
 
 - (NSArray *)allPrintLaterJobs
 {
-    if (nil == _allPrintLaterJobs) {
-        _allPrintLaterJobs = [[MPPrintLaterQueue sharedInstance] retrieveAllPrintLaterJobs];
-    }
+    _allPrintLaterJobs = [[MPPrintLaterQueue sharedInstance] retrieveAllPrintLaterJobs];
     
     return _allPrintLaterJobs;
 }
@@ -223,24 +221,14 @@ NSString * const kJobListScreenName = @"Job List Screen";
         navController = ((UISplitViewController *)vc).viewControllers[0];
         vc = (MPPageSettingsTableViewController *)navController.topViewController;
     }
-    
-    if( [vc isKindOfClass:[MPPageSettingsTableViewController class]] ) {
-        MPPageSettingsTableViewController *pageSettingsController = (MPPageSettingsTableViewController *)vc;
-        pageSettingsController.printLaterJob = self.selectedPrintJob;
-    }
-    
-    if( nil != previewController  &&  [previewController isKindOfClass:[MPPageSettingsTableViewController class]] ) {
-        previewController.printLaterJob = self.selectedPrintJob;
-    }
 }
 
 - (void)printJobs:(NSArray *)printJobs
 {
     self.selectedPrintJob = printJobs[0];
     self.selectedPrintJobs = printJobs;
-    MPPrintItem *printItem = [self.selectedPrintJob.printItems objectForKey:[MPPaper titleFromSize:[MP sharedInstance].defaultPaper.paperSize]];
-    printItem.extra = self.selectedPrintJob.extra;
-    UIViewController *vc = [[MP sharedInstance] printViewControllerWithDelegate:self dataSource:self printItem:printItem fromQueue:YES settingsOnly:NO];
+
+    UIViewController *vc = [[MP sharedInstance] printViewControllerWithDelegate:self dataSource:self printLaterJobs:printJobs fromQueue:YES settingsOnly:NO];
     if( [vc class] == [UINavigationController class] ) {
         [self setViewControllerPageRange:[(UINavigationController *)vc topViewController]];
         [self.navigationController pushViewController:[(UINavigationController *)vc topViewController] animated:YES];
@@ -374,7 +362,8 @@ NSString * const kJobListScreenName = @"Job List Screen";
             MPLogError(@"Unable to obtain offramp for print later job");
         }
         
-        [job prepareMetricswithOfframp:offramp];
+        [job prepareMetricsForOfframp:offramp];
+        [job setPrintSessionForPrintItem:printItem];
         
         NSDictionary *values = @{
                                  kMPPrintQueueActionKey:offramp,
@@ -460,7 +449,9 @@ NSString * const kJobListScreenName = @"Job List Screen";
 
 - (void)printJobsActionViewDidTapDeleteButton:(MPPrintJobsActionView *)printJobsActionView
 {
-    NSArray *checkMarkedPrintJobs = self.mutableCheckMarkedPrintJobs.copy;
+    NSSortDescriptor *highestToLowest = [NSSortDescriptor sortDescriptorWithKey:@"self" ascending:NO];
+    NSMutableArray *checkMarkedPrintJobs = self.mutableCheckMarkedPrintJobs.mutableCopy;
+    [checkMarkedPrintJobs sortUsingDescriptors:@[highestToLowest]];
     
     NSString *message = (checkMarkedPrintJobs.count > 1) ? [NSString stringWithFormat:MPLocalizedString(@"Are you sure you want to delete %d Prints?", nil), checkMarkedPrintJobs.count] : MPLocalizedString(@"Are you sure you want to delete 1 Print?", nil);
     

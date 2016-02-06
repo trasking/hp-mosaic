@@ -15,7 +15,7 @@
 
 @interface MPPrintItemImage()
 
-@property (strong, nonatomic) NSArray<UIImage *> *printImages;
+@property (strong, nonatomic) NSArray *printImages;
 
 @end
 
@@ -52,7 +52,7 @@
     return self;
 }
 
-- (id)initWithImages:(NSArray<UIImage *> *)images
+- (id)initWithImages:(NSArray *)images
 {
     self = [super init];
     if (self && images && images.count > 0) {
@@ -97,7 +97,7 @@
 
 - (id)printAssetForPageRange:(MPPageRange *)pageRange
 {
-    NSMutableArray<UIImage *> *printImages = [NSMutableArray arrayWithArray:self.printImages];
+    NSMutableArray *printImages = [NSMutableArray arrayWithArray:self.printImages];
     if( nil != pageRange && ![pageRange.range isEqualToString:pageRange.allPagesIndicator] ) {
         printImages = [NSMutableArray array];
         for (NSNumber *page in [pageRange getPages]) {
@@ -159,7 +159,7 @@
         UIImage *image = [UIImage imageWithData:data];
         [imagesAsImage addObject:image];
     }
-    NSArray<UIImage *> *images = imagesAsImage;
+    NSArray *images = imagesAsImage;
     
     return images;
 }

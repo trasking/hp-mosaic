@@ -20,17 +20,23 @@
 
 @interface MPMultiPageView : MPView
 
-@property (strong, nonatomic) NSArray *pageImages;
+@property (strong, nonatomic) NSMutableArray *pageImages;
 @property (strong, nonatomic) MPPaper *paper;
 @property (strong, nonatomic) MPLayout *layout;
 @property (weak, nonatomic) id<MPMultiPageViewDelegate>delegate;
 @property (assign, nonatomic) BOOL blackAndWhite;
 @property (assign, nonatomic, readonly) NSUInteger currentPage;
+@property (assign, nonatomic) NSInteger numBufferPages;
+@property (assign, nonatomic) BOOL rotationInProgress;
 
-- (void)setPages:(NSArray *)pages paper:(MPPaper *)paper layout:(MPLayout *)layout;
+- (void)configurePages:(NSUInteger)numPages paper:(MPPaper *)paper layout:(MPLayout *)layout;
 - (void)changeToPage:(NSUInteger)pageNumber animated:(BOOL)animated;
 - (void)refreshLayout;
 - (void)setInterfaceOptions:(MPInterfaceOptions *)options;
+- (void)showPageNumberLabel:(BOOL)show;
+- (void)cancelZoom;
+- (void)setPageNum:(NSInteger)pageNum blackAndWhite:(BOOL)blackAndWhite;
+- (CGRect)currentPageFrame;
 
 @end
 
@@ -40,5 +46,8 @@
 - (void)multiPageView:(MPMultiPageView *)multiPageView didChangeFromPage:(NSUInteger)oldPageNumber ToPage:(NSUInteger)newPageNumber;
 - (void)multiPageView:(MPMultiPageView *)multiPageView didSingleTapPage:(NSUInteger)pageNumber;
 - (void)multiPageView:(MPMultiPageView *)multiPageView didDoubleTapPage:(NSUInteger)pageNumber;
+- (UIImage *)multiPageView:(MPMultiPageView *)multiPageView getImageForPage:(NSUInteger)pageNumber;
+- (BOOL)multiPageView:(MPMultiPageView *)multiPageView useMultiPageIndicatorForPage:(NSUInteger)pageNumber;
+- (CGFloat)multiPageView:(MPMultiPageView *)multiPageView shrinkPageVertically:(NSInteger)pageNum;
 
 @end

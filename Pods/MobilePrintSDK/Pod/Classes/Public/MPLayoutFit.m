@@ -11,75 +11,149 @@
 //
 
 #import "MPLayoutFit.h"
-#import "UIImage+MPResize.h"
+#import "MPLayoutPrepStepAdjust.h"
+#import "MPLayoutPrepStepRotate.h"
+#import "MPLayoutAlgorithmFit.h"
+
+@interface MPLayoutComposite (protected)
+
+@property (strong, nonatomic) MPLayoutAlgorithm *algorithm;
+
+@end
+
+@interface MPLayoutFit()
+
+@property (strong, nonatomic, readonly) MPLayoutPrepStepAdjust *adjustStep;
+@property (strong, nonatomic, readonly) MPLayoutPrepStepRotate *rotateStep;
+
+@end
 
 @implementation MPLayoutFit
 
-NSString * const kMPLayoutHorizontalPositionKey = @"kMPLayoutHorizontalPositionKey";
-NSString * const kMPLayoutVerticalPositionKey = @"kMPLayoutVerticalPositionKey";
-
 - (id)initWithOrientation:(MPLayoutOrientation)orientation assetPosition:(CGRect)position;
 {
-    self = [super initWithOrientation:orientation assetPosition:position];
-    if (self) {
-        _horizontalPosition = MPLayoutHorizontalPositionMiddle;
-        _verticalPosition = MPLayoutVerticalPositionMiddle;
+    return [self initWithOrientation:orientation assetPosition:position shouldRotate:YES];
+}
+
+- (id)initWithOrientation:(MPLayoutOrientation)orientation assetPosition:(CGRect)position shouldRotate:(BOOL)shouldRotate
+{
+    MPLayoutAlgorithmFit *algorithm = [[MPLayoutAlgorithmFit alloc] init];
+    
+    _adjustStep = [[MPLayoutPrepStepAdjust alloc] initWithAdjustment:position];
+    _rotateStep = [[MPLayoutPrepStepRotate alloc] initWithOrientation:orientation];
+    NSArray *prepSteps = shouldRotate ? @[ _adjustStep, _rotateStep ] : @[ _adjustStep ];
+    
+    return self = [super initWithAlgorithm:algorithm andPrepSteps:prepSteps];
+}
+
+- (CGRect)assetPosition
+{
+    return self.adjustStep.adjustment;
+}
+
+- (MPLayoutOrientation)orientation
+{
+    return self.rotateStep.orientation;
+}
+
+#pragma mark - Position properties
+
+- (MPLayoutHorizontalPosition)horizontalPosition
+{
+    MPLayoutAlgorithmFit *fitAlgorithm = (MPLayoutAlgorithmFit *)self.algorithm;
+    return fitAlgorithm.horizontalPosition;
+}
+
+- (void)setHorizontalPosition:(MPLayoutHorizontalPosition)horizontalPosition
+{
+    MPLayoutAlgorithmFit *currentAlgorithm = (MPLayoutAlgorithmFit *)self.algorithm;
+    MPLayoutAlgorithmFit *newAlgorithm = [[MPLayoutAlgorithmFit alloc] initWithHorizontalPosition:horizontalPosition andVerticalPosition:currentAlgorithm.verticalPosition];
+    self.algorithm = newAlgorithm;
+}
+
+- (MPLayoutVerticalPosition)verticalPosition
+{
+    MPLayoutAlgorithmFit *fitAlgorithm = (MPLayoutAlgorithmFit *)self.algorithm;
+    return fitAlgorithm.verticalPosition;
+}
+
+- (void)setVerticalPosition:(MPLayoutVerticalPosition)verticalPosition
+{
+    MPLayoutAlgorithmFit *currentAlgorithm = (MPLayoutAlgorithmFit *)self.algorithm;
+    MPLayoutAlgorithmFit *newAlgorithm = [[MPLayoutAlgorithmFit alloc] initWithHorizontalPosition:currentAlgorithm.horizontalPosition andVerticalPosition:verticalPosition];
+    self.algorithm = newAlgorithm;
+}
+
+#pragma mark - Rotation handling
+
+- (MPLayoutAlgorithm *)prepareAlgorithm:(UIImage *)image inRect:(CGRect)rect
+{
+    MPLayoutAlgorithmFit *originalAlgorithm = (MPLayoutAlgorithmFit *)self.algorithm;
+    MPLayoutHorizontalPosition rotatedHorizontalPosition = [self rotatedVerticalPosition:self.verticalPosition];
+    MPLayoutVerticalPosition rotatedVerticalPosition = [self rotatedHorizontalPosition:self.horizontalPosition];
+    MPLayoutAlgorithmFit *rotatedAlgortihm = [[MPLayoutAlgorithmFit alloc] initWithHorizontalPosition:rotatedHorizontalPosition andVerticalPosition:rotatedVerticalPosition];
+    
+    [self.rotateStep imageForImage:image inContainer:rect];
+    if (self.rotateStep.rotated) {
+        self.algorithm = rotatedAlgortihm;
     }
-    return self;
+    
+    return originalAlgorithm;
 }
 
 - (void)drawContentImage:(UIImage *)image inRect:(CGRect)rect
 {
-    CGRect containerRect = [self assetPositionForRect:rect];
-    CGRect contentRect = CGRectMake(0, 0, image.size.width, image.size.height);
-    UIImage *contentImage = image;
-    if ([self rotationNeededForContent:contentRect withContainer:containerRect]) {
-        contentImage = [image MPRotate];
-        contentRect = CGRectMake(0, 0, contentImage.size.width, contentImage.size.height);
-    }
+    MPLayoutAlgorithm *originalAlgorithm = [self prepareAlgorithm:image inRect:rect];
+    [super drawContentImage:image inRect:rect];
+    self.algorithm = originalAlgorithm;
+}
 
-    [contentImage drawInRect:[self computeRectWithContentRect:contentRect andContainerRect:containerRect]];
+- (CGRect)contentImageLocation:(UIImage *)image inRect:(CGRect)rect
+{
+    MPLayoutAlgorithm *originalAlgorithm = [self prepareAlgorithm:image inRect:rect];
+    CGRect layoutContainer = [super contentImageLocation:image inRect:rect];
+    self.algorithm = originalAlgorithm;
+    
+    return layoutContainer;
 }
 
 - (void)layoutContentView:(UIView *)contentView inContainerView:(UIView *)containerView
 {
-    CGRect containerRect = [self assetPositionForRect:containerView.bounds];
-    CGRect contentRect = contentView.bounds;
-    if ([self rotationNeededForContent:contentRect withContainer:containerRect]) {
-        contentRect = CGRectMake(contentRect.origin.x, contentRect.origin.y, contentRect.size.height, contentRect.size.width);
+    MPLayoutAlgorithmFit *originalAlgorithm = (MPLayoutAlgorithmFit *)self.algorithm;
+    MPLayoutHorizontalPosition rotatedHorizontalPosition = [self rotatedVerticalPosition:self.verticalPosition];
+    MPLayoutVerticalPosition rotatedVerticalPosition = [self rotatedHorizontalPosition:self.horizontalPosition];
+    MPLayoutAlgorithmFit *rotatedAlgortihm = [[MPLayoutAlgorithmFit alloc] initWithHorizontalPosition:rotatedHorizontalPosition andVerticalPosition:rotatedVerticalPosition];
+    
+    [self.rotateStep contentRectForContent:contentView.bounds inContainer:containerView.bounds];
+    if (self.rotateStep.rotated) {
+        self.algorithm = rotatedAlgortihm;
     }
     
-    CGRect contentframe = [self computeRectWithContentRect:contentRect andContainerRect:containerRect];
+    [super layoutContentView:contentView inContainerView:containerView];
     
-    [self applyConstraintsWithFrame:contentframe toContentView:contentView inContainerView:containerView];
+    self.algorithm = originalAlgorithm;
 }
 
-- (CGRect)computeRectWithContentRect:(CGRect)contentRect andContainerRect:(CGRect)containerRect
+- (MPLayoutHorizontalPosition)rotatedVerticalPosition:(MPLayoutVerticalPosition)verticalPosition
 {
-    CGFloat contentAspectRatio = contentRect.size.width / contentRect.size.height;
-    CGFloat containerAspectRatio = containerRect.size.width / containerRect.size.height;
-    CGFloat width = containerRect.size.height * contentAspectRatio;
-    CGFloat height = containerRect.size.height;
-    if (contentAspectRatio > containerAspectRatio) {
-        width = containerRect.size.width;
-        height = containerRect.size.width / contentAspectRatio;
+    MPLayoutHorizontalPosition rotatedPosition = MPLayoutHorizontalPositionMiddle;
+    if (MPLayoutVerticalPositionTop == verticalPosition) {
+        rotatedPosition = MPLayoutHorizontalPositionLeft;
+    } else if (MPLayoutVerticalPositionBottom == verticalPosition) {
+        rotatedPosition = MPLayoutHorizontalPositionRight;
     }
-    CGFloat x = containerRect.origin.x + (containerRect.size.width - width) / 2.0;
-    CGFloat y = containerRect.origin.y + (containerRect.size.height - height) / 2.0;
-    
-    if( MPLayoutVerticalPositionTop == self.verticalPosition ) {
-        y = containerRect.origin.y;
-    } else if( MPLayoutVerticalPositionBottom == self.verticalPosition ) {
-        y = containerRect.origin.y + containerRect.size.height - height;
+    return rotatedPosition;
+}
+
+- (MPLayoutVerticalPosition)rotatedHorizontalPosition:(MPLayoutHorizontalPosition)horizontalPosition
+{
+    MPLayoutVerticalPosition rotatedPosition = MPLayoutVerticalPositionMiddle;
+    if (MPLayoutHorizontalPositionLeft == horizontalPosition) {
+        rotatedPosition = MPLayoutVerticalPositionBottom;
+    } else if (MPLayoutHorizontalPositionRight == horizontalPosition) {
+        rotatedPosition = MPLayoutVerticalPositionTop;
     }
-    
-    if( MPLayoutHorizontalPositionLeft == self.horizontalPosition ) {
-        x = containerRect.origin.x;
-    } else if( MPLayoutHorizontalPositionRight == self.horizontalPosition ) {
-        x = containerRect.origin.x + containerRect.size.width - width;
-    }
-    
-    return CGRectMake(x, y, width, height);
+    return rotatedPosition;
 }
 
 @end
